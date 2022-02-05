@@ -52,6 +52,8 @@ namespace TrayToolbar
             UpdateLightDarkMode();
         }
 
+        public bool HideIfActive = false;
+
         public string FileName;
 
         public string Command { get; set; }

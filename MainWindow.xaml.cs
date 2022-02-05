@@ -26,6 +26,11 @@ namespace TrayToolbar
     public partial class MainWindow : Window
     {
         List<ActionIconButton> actionIconButtonsList;
+
+        List<Process> activeProcesses;
+        List<ActionIconButton> btnToHideIfProcStarted;
+
+
         //int itemHeight = 25;
         int itemHeight = 20;
         string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xml";
@@ -45,6 +50,11 @@ namespace TrayToolbar
             this.ShowInTaskbar = false;
 
             actionIconButtonsList = new List<ActionIconButton>();
+
+            //activeProcessesAndBtns = new Dictionary<Process, ActionIconButton>();
+
+            activeProcesses = new List<Process>();
+            btnToHideIfProcStarted = new List<ActionIconButton>();
 
             ChangeWindowTheme();
 
@@ -313,9 +323,27 @@ namespace TrayToolbar
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlFile);
             XmlNodeList? itemNodes = xmlDoc.SelectNodes("//buttons/button");
+
             int index = 0;
             foreach (XmlNode itemNode in itemNodes)
             {
+                //string hideAttr = itemNode.Attributes["hideIfActive"].Value;
+                string hideAttr = "";
+
+                bool hideIfActive = false;
+                if (itemNode.Attributes["hideIfActive"] != null)
+                {
+                    hideAttr = itemNode.Attributes["hideIfActive"].Value;
+                    if (hideAttr.ToLower().Equals("true"))
+                    {
+                        hideIfActive = true;
+                    }
+                    else if (hideAttr.ToLower().Equals("´false"))
+                    {
+                        hideIfActive = false;
+                    }
+                }
+
                 XmlNode textNode = itemNode.SelectSingleNode("text");
                 XmlNode commandNode = itemNode.SelectSingleNode("command");
                 XmlNode iconNode = itemNode.SelectSingleNode("icon");
@@ -339,7 +367,7 @@ namespace TrayToolbar
                         fileName = fileNameNode.InnerText;
                     }
 
-                    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, icon, fileName);
+                    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, icon, fileName, hideIfActive);
 
                     //if (iconNode != null)
                     //{
@@ -400,7 +428,7 @@ namespace TrayToolbar
             }
         }
 
-        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd")
+        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false)
         {
             ActionIconButton actionIconButton = new(text, false);
             //actionIconButton.Height = itemHeight;
@@ -418,7 +446,7 @@ namespace TrayToolbar
                 //actionIconButton.Icon = icon;
             }
 
-
+            actionIconButton.HideIfActive = hideIFActive;
 
             actionIconButton.FileName = fileName;
 
@@ -471,13 +499,23 @@ namespace TrayToolbar
             var cmd = btn.Command;
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             //processStartInfo.FileName = "cmd";
+
             processStartInfo.FileName = btn.FileName;
+
             //processStartInfo.Arguments = "/c \"" + ((ActionIconButton)sender).Command + "\"";
             //processStartInfo.Arguments = ((ActionIconButton)sender).Command;
-            
-            if(cmd.Contains("&"))
+
+            if (cmd.Contains("&"))
+            {
                 processStartInfo.Arguments = "/c " + cmd;
-            else processStartInfo.Arguments = "/c \"" + cmd + "\"";
+            }
+            else
+            {
+                //processStartInfo.Arguments = "/c \"" + cmd + "\"";
+                if (processStartInfo.FileName == "")
+                    processStartInfo.FileName = cmd;
+                else processStartInfo.Arguments = "/c \"" + cmd + "\"";
+            }
 
 
             //processStartInfo.UseShellExecute = true;
@@ -493,12 +531,72 @@ namespace TrayToolbar
             }
 
             //processStartInfo.CreateNoWindow = false;
+            Process p = new Process();
 
-            Process.Start(processStartInfo);
+            p.StartInfo = processStartInfo;
+
+
             //Process.Start("cmd");
             //Cursor = Cursors.Arrow;
+
             await Task.Delay(1000);
+
+            p.Start();
+
+            if (p.Responding && !p.HasExited)
+            {
+                if (btn.HideIfActive == true)
+                {
+                    btn.Visibility = Visibility.Collapsed;
+
+                    activeProcesses.Add(p);
+                    btnToHideIfProcStarted.Add(btn);
+
+                    p.EnableRaisingEvents = true;
+                    p.Exited += P_Exited;
+                    p.Disposed += P_Disposed;
+                }
+            }
+
+            
+
+            //string myString = processesAndBtns[1][myTime] // Day 1 at that specific time.
+
+
+            //await Task.Delay(500);
             Mouse.OverrideCursor = null;
+
+
+            //p.Close();
+        }
+
+        private void P_Disposed(object? sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void P_Exited(object? sender, EventArgs e)
+        {
+            Process p = (Process)sender;
+            for (int i = 0; i < activeProcesses.Count; i++)
+            {
+                //Process process = (Process)actionIconButtonsList[i];
+                //Dictionary<Process, ActionIconButton>() d = new 
+
+                if (p == activeProcesses[i])
+                {
+                    this.Dispatcher.Invoke(
+                    System.Windows.Threading.DispatcherPriority.Normal,
+                    new Action(
+                        delegate ()
+                        {
+                            btnToHideIfProcStarted[i].Visibility = Visibility.Visible;
+                        }
+                    ));
+
+
+                }
+            }
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)
