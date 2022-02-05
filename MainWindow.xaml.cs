@@ -27,7 +27,7 @@ namespace TrayToolbar
     {
         List<ActionIconButton> actionIconButtonsList;
         //int itemHeight = 25;
-        int itemHeight = 22;
+        int itemHeight = 20;
         string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xml";
 
         public MainWindow()

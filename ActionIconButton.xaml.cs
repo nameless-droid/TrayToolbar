@@ -74,8 +74,12 @@ namespace TrayToolbar
         public void SetHeight(int value)
         {
             this.Height = value;
-            img.Width = img.Height = value / 1.5;
-            lbl.FontSize = value / 2;
+            //img.Width = img.Height = value / 1.5;
+            img.Width = img.Height = value / 1.3;
+            //lbl.FontSize = value / 2;
+            //lbl.FontSize = value / 1.8;
+            //lbl.FontSize = value / 1.5;
+            lbl.FontSize = value / 1.6;
         }
 
         //public void UpdateLightDarkMode(bool light)
