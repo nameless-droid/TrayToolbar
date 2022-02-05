@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -24,9 +25,121 @@ namespace TrayToolbar
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<ActionIconButton> actionIconButtonsList;
+        int itemHeight = 25;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
+            currentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+            
+            //this.Visibility = Visibility.Hidden;
+     
+
+            actionIconButtonsList = new List<ActionIconButton>();
+
+            ChangeWindowTheme();
+
+            Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+        }
+
+        private void CurrentDomain_FirstChanceException(object? sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+        {
+            //File.Create("ddddd124.txt");
+
+            //StreamWriter sw = File.AppendText("log1221.txt");
+            //sw.WriteLine(DateTime.Now + " " + e);
+
+            using (StreamWriter sw = File.AppendText("error.txt"))
+            {
+                sw.WriteLine(DateTime.Now + " " + e.Exception);
+            }
+        }
+
+        static void MyHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            //File.Create("ddddd124.txt");
+
+            Exception e = (Exception)args.ExceptionObject;
+            //Console.WriteLine("MyHandler caught : " + e.Message);
+            //Console.WriteLine("Runtime terminating: {0}", args.IsTerminating);
+
+            //Debug.WriteLine("MyHandler caught : " + e.Message);
+
+            //StreamWriter sw = File.AppendText("log.txt");
+            //sw.WriteLine(DateTime.Now + " " + e.Message);
+
+            using (StreamWriter sw = File.AppendText("error.txt"))
+            {
+                sw.WriteLine(DateTime.Now + " " + e.Message);
+            }
+        }
+
+
+        private void SystemEvents_UserPreferenceChanged(object sender, Microsoft.Win32.UserPreferenceChangedEventArgs e)
+        {
+            //if (e.Category == Microsoft.Win32.UserPreferenceCategory.General)
+            //{
+            //    Debug.WriteLine(SystemParameters.UxThemeName);
+            //}
+
+            ChangeWindowTheme();
+        }
+
+        private void ChangeWindowTheme()
+        {
+            RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", false);
+            bool d = rk.GetValue("SystemUsesLightTheme").Equals(1);
+            if (rk.GetValue("SystemUsesLightTheme").Equals(1))
+            {
+                ActionIconButton firstItem = new ActionIconButton("--", true);
+                //foreach (var item in actionIconButtonsList)
+                //{
+                //    item.LightMode = true;
+
+                //}
+                for (int i = 0; i < actionIconButtonsList.Count; i++)
+                {
+                    actionIconButtonsList[i].LightMode = true;
+                    if (i == 0)
+                        firstItem = actionIconButtonsList[i];
+                }
+                //this.Background = firstItem.stackpanel.Background;
+                mainBorder.Background = firstItem.stackpanel.Background;
+
+                foreach (Button item in sp_WindowBar.Children)
+                {
+                    item.Foreground = Brushes.Black;
+                    //item.Style = (Style)Resources["btnBlue"];
+                    object resource = Application.Current.FindResource("TransparentStyle");
+                    if (resource != null && resource.GetType() == typeof(Style))
+                        item.Style = (Style)resource;
+                }
+            }
+            else
+            {
+                ActionIconButton firstItem = new ActionIconButton("--", false);
+                for (int i = 0; i < actionIconButtonsList.Count; i++)
+                {
+                    actionIconButtonsList[i].LightMode = false;
+                    if (i == 0)
+                        firstItem = actionIconButtonsList[i];
+                }
+                mainBorder.Background = firstItem.stackpanel.Background;
+
+                foreach (Button item in sp_WindowBar.Children)
+                {
+                    item.Foreground = Brushes.White;
+                    //item.Style = (Style)Resources["btnBlue"];
+                    //object resource = Application.Current.FindResource("btnBlue");
+                    object resource = Application.Current.FindResource("TransparentStyle");
+                    if (resource != null && resource.GetType() == typeof(Style))
+                        item.Style = (Style)resource;
+                }
+            }
         }
 
         private void NewCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -42,11 +155,23 @@ namespace TrayToolbar
 
             GetCursorPos(out var pt);
             //pt.X = 0;
+            double newX = pt.X - this.Width / 2;
+            if (newX + this.Width >= 1920)
+            {
+                this.Left = 1920 - this.Width;
+            }
+            else
+            {
+                this.Left = pt.X - this.Width / 2;
+            }
 
-            this.Left = pt.X - this.Width / 2;
             this.Top = p.Y - this.Height;
 
             this.Show();
+
+            this.Visibility = Visibility.Visible;
+            this.Topmost = true;
+            this.Topmost = false;
         }
         #region dll imports
         [DllImport("user32.dll", SetLastError = true)]
@@ -81,15 +206,65 @@ namespace TrayToolbar
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //foreach (string item in Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀"))
-            foreach (string item in Directory.GetFiles(@"E:\Visual Studio Test\StylingOfStuff\bin\Debug\Test"))
-            {
-                string text = System.IO.Path.GetFileName(item);
-                CreateButtonAndAddToStackPanel(item, text);
-            }
-            ///////////
-            //////////
+
+            //*
+            List<string> ignoreFiles = new List<string>();
             /////////
+            XmlDocument xmlDoc1 = new XmlDocument();
+            xmlDoc1.Load("test.xml");
+            XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
+
+            foreach (XmlNode itemNode in itemNodes1)
+            {
+                XmlNode textNode = itemNode.SelectSingleNode("text");
+                if ((textNode != null))
+                {
+                    ignoreFiles.Add(textNode.InnerText);
+                }
+            }
+
+
+            XmlDocument xmlDoc2 = new XmlDocument();
+            xmlDoc2.Load("test.xml");
+            XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
+
+            if (itemNode1.Attributes != null)
+            {
+                if (itemNode1.Attributes["after"].Value.Equals("true"))
+                {
+                    CreatButtonsFromFiles(ignoreFiles);
+                    CreateButtonsFromXML();
+                }
+                else
+                {
+                    CreateButtonsFromXML();
+                    CreatButtonsFromFiles(ignoreFiles);
+                }
+            }
+            else
+            {
+                CreateButtonsFromXML();
+                CreatButtonsFromFiles(ignoreFiles);
+            }
+
+            //foreach (XmlNode itemNode in itemNodes1)
+            //{
+            //    XmlNode textNode = itemNode.SelectSingleNode("text");
+            //    if ((textNode != null))
+            //    {
+            //        ignoreFiles.Add(textNode.InnerText);
+            //    }
+            //}
+
+
+
+
+            ChangeWindowTheme();
+            //*/
+        }
+
+        private void CreateButtonsFromXML()
+        {
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load("test.xml");
             XmlNodeList? itemNodes = xmlDoc.SelectNodes("//buttons/button");
@@ -98,6 +273,7 @@ namespace TrayToolbar
             {
                 XmlNode textNode = itemNode.SelectSingleNode("text");
                 XmlNode commandNode = itemNode.SelectSingleNode("command");
+                XmlNode iconNode = itemNode.SelectSingleNode("icon");
                 if ((textNode != null) && (commandNode != null))
                 {
                     //Button btn = new Button();
@@ -105,7 +281,15 @@ namespace TrayToolbar
                     //btn.Click += Btn_Click;
                     //btn.Tag = commandNode.InnerText;
 
-                    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText);
+                    if (iconNode != null)
+                    {
+                        CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, iconNode.InnerText);
+                    }
+                    else
+                    {
+                        CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText);
+                    }
+
 
                     if (itemNode.Attributes["color"] != null)
                     {
@@ -124,24 +308,72 @@ namespace TrayToolbar
                         //catch (Exception) { }
                     }
 
+
+                    //if (iconNode != null)
+                    //{
+
+                    //}
+
                     //stackPanel.Children.Add(btn);
                     index++;
                 }
             }
         }
 
-
-        private void CreateButtonAndAddToStackPanel(string filePath, string text)
+        private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
-            ActionIconButton actionIconButton = new(text);
-            actionIconButton.Icon = filePath;
+            foreach (string item in Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀"))
+            //foreach (string item in Directory.GetFiles(@"E:\Visual Studio Test\StylingOfStuff\bin\Debug\Test"))
+            {
+
+
+                //if (item.Contains("shutdown"))
+                //{
+                //    ;
+                //}
+
+                if (ignoreFiles.Contains(System.IO.Path.GetFileName(item)))
+                    continue;
+
+                string text = System.IO.Path.GetFileName(item);
+                CreateButtonAndAddToStackPanel(item, text);
+            }
+        }
+
+        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "")
+        {
+            ActionIconButton actionIconButton = new(text, false);
+            //actionIconButton.Height = itemHeight;
+            actionIconButton.SetHeight(itemHeight);
+
+            if (icon == "")
+            {
+                //actionIconButton.Icon = filePath;
+                actionIconButton.SetIconFromFile(filePath);
+            }
+            else
+            {
+                actionIconButton.SetIconFromFile(icon);
+
+                //actionIconButton.Icon = icon;
+            }
+
+
+
+
             //actionIconButton.Text = item;
             actionIconButton.Command = filePath;
             //actionIconButton.BG = "Black";
             //actionIconButton.BG = "#2B2B2B";
-            actionIconButton.LightMode = false;
+            //actionIconButton.LightMode = false;
             actionIconButton.Click += ActionIconButton_Click;
             stackPanel.Children.Add(actionIconButton);
+            //this.Height = 18 + 33 * stackPanel.Children.Count;
+            this.Height = 18 + itemHeight * stackPanel.Children.Count + 4;
+            this.Width = 250;
+            //this.Background = actionIconButton.stackpanel.Background;
+
+            actionIconButtonsList.Add(actionIconButton);
         }
 
         private async void ActionIconButton_Click(object sender, RoutedEventArgs e)
@@ -184,6 +416,30 @@ namespace TrayToolbar
             //Cursor = Cursors.Arrow;
             await Task.Delay(1000);
             Mouse.OverrideCursor = null;
+        }
+
+        private void Close_Click(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            //if (!System.IO.File.Exists("test.xml"))
+            //{
+            //    //return false;
+            //}
+            //Clean up file path so it can be navigated OK
+            //filePath = System.IO.Path.GetFullPath(filePath);
+
+            System.Diagnostics.Process.Start("explorer.exe", string.Format("/select,\"{0}\"", "test.xml"));
+
+            //return true;
+        }
+
+        private void Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.Visibility = Visibility.Hidden;
         }
     }
 }

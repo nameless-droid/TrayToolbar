@@ -21,13 +21,15 @@ namespace TrayToolbar
     /// </summary>
     public partial class ActionIconButton : UserControl
     {
-        public string Command { get; set; }
-        public bool LightMode { get; set; }
+
+        public string darkColorString;
+        public string darkHoverColorString;
+
+        public string lightColorString;
+        public string lightHoverColorString;
 
 
-        private Brush oldBg;
-
-        public ActionIconButton(string text)
+        public ActionIconButton(string text, bool _lightMode)
         {
             InitializeComponent();
 
@@ -39,19 +41,56 @@ namespace TrayToolbar
             this.MouseLeave += UserControl1_MouseLeave;
 
             PreviewMouseLeftButtonUp += (sender, args) => OnClick();
+
+            darkColorString = "#2B2B2B";
+            darkHoverColorString = "#414141";
+
+            lightColorString = "#EEEEEE";
+            lightHoverColorString = "#FFFFFF";
+
+            LightMode = _lightMode;
+            UpdateLightDarkMode();
         }
 
-        public void UpdateLightDarkMode(bool light)
+        public string Command { get; set; }
+        //public bool LightMode { get; set; }
+
+        private bool lightMode;
+
+        public bool LightMode
         {
-            if (light == true)
+            get { return lightMode; }
+            set {
+                lightMode = value;
+                UpdateLightDarkMode();
+            } 
+        }
+
+
+        //private Brush oldBg;
+
+        public void SetHeight(int value)
+        {
+            this.Height = value;
+            img.Width = img.Height = value / 1.5;
+            lbl.FontSize = value / 2;
+        }
+
+        //public void UpdateLightDarkMode(bool light)
+        public void UpdateLightDarkMode()
+        {
+            if (lightMode == true)
             {
+                //lbl.Foreground = Brushes.Black;
+                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
                 lbl.Foreground = Brushes.Black;
             }
             else
             {
+                //lbl.Foreground = Brushes.White;
+                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkColorString));
                 lbl.Foreground = Brushes.White;
             }
-            LightMode = light;
         }
 
         private void UserControl1_MouseEnter(object sender, MouseEventArgs e)
@@ -75,12 +114,14 @@ namespace TrayToolbar
             if (LightMode == true)
             {
                 //#EEEEEE
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
+                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
+                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightHoverColorString));
             }
             else
             {
                 //#2B2B2B
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#414141"));
+                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#414141"));
+                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkHoverColorString));
             }
         }
 
@@ -100,12 +141,14 @@ namespace TrayToolbar
             if (LightMode == true)
             {
                 //#FFFFFF
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
             }
             else
             {
                 //#414141
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkColorString));
             }
         }
 
@@ -181,7 +224,16 @@ namespace TrayToolbar
                 filePath = filePath.TrimEnd(filePath[^1]);
             }
 
-            System.Drawing.Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+            System.Drawing.Icon icon = System.Drawing.SystemIcons.Application;
+
+            //try
+            //{
+                icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+            //}
+            //catch (Exception)
+            //{
+            //}
+
             img.Source = ToImageSource(icon);
         }
 
