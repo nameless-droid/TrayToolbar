@@ -8,7 +8,7 @@
              d:DesignHeight="100" x:Name="ucontrol" d:DesignWidth="200" Loaded="ucontrol_Loaded">
     <Grid Margin="0">
         <StackPanel x:Name="stackpanel" Background="{Binding background}" Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0">
-            <Image x:Name="img" Width="32" Height="32" StretchDirection="DownOnly"></Image>
+            <Image Margin="4" x:Name="img" Width="32" Height="32" StretchDirection="DownOnly"></Image>
             <Label x:Name="lbl" VerticalAlignment="Center" VerticalContentAlignment="Center"></Label>
         </StackPanel>
         <!--<Image x:Name="img" Height="32" Width="32" HorizontalAlignment="Left" Margin="10"></Image>-->

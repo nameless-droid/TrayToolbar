@@ -6,14 +6,14 @@
         xmlns:local="clr-namespace:TrayToolbar"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStyle="None" Background="Transparent">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStyle="None" Background="Transparent" AllowsTransparency="True" ResizeMode="NoResize">
     <!--<WindowChrome.WindowChrome>
         <WindowChrome NonClientFrameEdges="None" GlassFrameThickness="0" ResizeBorderThickness="7" CaptionHeight="18" CornerRadius="0"></WindowChrome>
     </WindowChrome.WindowChrome>-->
     <WindowChrome.WindowChrome>
         <WindowChrome
             ResizeBorderThickness="6"
-            CaptionHeight="18"
+            CaptionHeight="0"
             CornerRadius="0"
             GlassFrameThickness="0">
         </WindowChrome>
@@ -33,18 +33,18 @@
             
         </Style>-->
     </Window.Resources>
-    <Border ClipToBounds="True" x:Name="mainBorder" CornerRadius="7" BorderThickness="0" BorderBrush="{Binding ElementName=mainBorder, Path=Background}" Background="White">
-        <Grid Margin="0">
-            <Border Height="19" Background="Transparent" VerticalAlignment="Top" BorderBrush="Transparent" BorderThickness="0">
-                <StackPanel x:Name="sp_WindowBar" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
+    <Border ClipToBounds="True" x:Name="mainBorder" CornerRadius="7" BorderThickness="0.4" BorderBrush="{Binding ElementName=mainBorder, Path=Background}" Background="Black">
+        <Grid ClipToBounds="True" Margin="0" Background="Transparent">
+            <Border CornerRadius="7" ClipToBounds="True" Height="19" Background="Transparent" VerticalAlignment="Top" BorderBrush="Transparent" BorderThickness="0">
+                <StackPanel ClipToBounds="True" x:Name="sp_WindowBar" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
                     <!--<Button Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right"></Button>-->
-                    <Button Click="Minimize_Click" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE738;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
-                    <Button Click="Settings_Click" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
+                    <Button FocusVisualStyle="{x:Null}" Click="Minimize_Click" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE738;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
+                    <Button FocusVisualStyle="{x:Null}" Click="Settings_Click" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
                     <!--<Button Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>-->
-                    <Button FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>
+                    <Button FocusVisualStyle="{x:Null}" ClipToBounds="True" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>
                 </StackPanel>
             </Border>
-        <StackPanel x:Name="stackPanel" Margin="3,18,3,0"></StackPanel>
+        <StackPanel x:Name="stackPanel" Margin="0,18,0,0"></StackPanel>
         <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible" NoLeftClickDelay="True" LeftClickCommand="ApplicationCommands.New"/>
             <!--<Button WindowChrome.IsHitTestVisibleInChrome="True" Style="{StaticResource TransparentStyle}" VerticalAlignment="Top" HorizontalAlignment="Right" Width="25" Height="25"

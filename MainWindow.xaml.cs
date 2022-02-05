@@ -26,7 +26,9 @@ namespace TrayToolbar
     public partial class MainWindow : Window
     {
         List<ActionIconButton> actionIconButtonsList;
-        int itemHeight = 25;
+        //int itemHeight = 25;
+        int itemHeight = 22;
+        string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xml";
 
         public MainWindow()
         {
@@ -35,13 +37,51 @@ namespace TrayToolbar
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
             currentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
-            
+
             //this.Visibility = Visibility.Hidden;
-     
+
+            this.Left = -11000;
+            this.Top = -11111;
+            this.ShowInTaskbar = false;
 
             actionIconButtonsList = new List<ActionIconButton>();
 
             ChangeWindowTheme();
+
+            string[] args = Environment.GetCommandLineArgs();
+            //Debug.WriteLine(args[0]);
+            //MessageBox.Show(args[1]);
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                switch (i)
+                {
+                    case 1:
+                        xmlFile = args[i];
+                        break;
+                    default:
+                        break;
+                }
+
+                //_ = i switch
+                //{
+                //    0 => xmlFile = args[i]
+                //};
+
+
+
+            }
+
+            //foreach (string arg in args) {
+
+            //    switch (arg)
+            //    {
+            //        case 
+            //        default:
+            //            break;
+            //    }
+
+            //}
 
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         }
@@ -117,6 +157,10 @@ namespace TrayToolbar
                     object resource = Application.Current.FindResource("TransparentStyle");
                     if (resource != null && resource.GetType() == typeof(Style))
                         item.Style = (Style)resource;
+
+                    //object nul = Application.Current.FindResource("nul");
+
+                    //item.FocusVisualStyle = (Style)nul;
                 }
             }
             else
@@ -211,7 +255,8 @@ namespace TrayToolbar
             List<string> ignoreFiles = new List<string>();
             /////////
             XmlDocument xmlDoc1 = new XmlDocument();
-            xmlDoc1.Load("test.xml");
+            //xmlDoc1.Load("test.xml");
+            xmlDoc1.Load(xmlFile);
             XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
 
             foreach (XmlNode itemNode in itemNodes1)
@@ -225,7 +270,7 @@ namespace TrayToolbar
 
 
             XmlDocument xmlDoc2 = new XmlDocument();
-            xmlDoc2.Load("test.xml");
+            xmlDoc2.Load(xmlFile);
             XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
 
             if (itemNode1.Attributes != null)
@@ -266,7 +311,7 @@ namespace TrayToolbar
         private void CreateButtonsFromXML()
         {
             XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load("test.xml");
+            xmlDoc.Load(xmlFile);
             XmlNodeList? itemNodes = xmlDoc.SelectNodes("//buttons/button");
             int index = 0;
             foreach (XmlNode itemNode in itemNodes)
@@ -274,6 +319,7 @@ namespace TrayToolbar
                 XmlNode textNode = itemNode.SelectSingleNode("text");
                 XmlNode commandNode = itemNode.SelectSingleNode("command");
                 XmlNode iconNode = itemNode.SelectSingleNode("icon");
+                XmlNode fileNameNode = itemNode.SelectSingleNode("fileName");
                 if ((textNode != null) && (commandNode != null))
                 {
                     //Button btn = new Button();
@@ -281,14 +327,28 @@ namespace TrayToolbar
                     //btn.Click += Btn_Click;
                     //btn.Tag = commandNode.InnerText;
 
+                    string icon = "";
                     if (iconNode != null)
                     {
-                        CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, iconNode.InnerText);
+                        icon = iconNode.InnerText;
                     }
-                    else
+
+                    string fileName = "cmd";
+                    if (fileNameNode != null)
                     {
-                        CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText);
+                        fileName = fileNameNode.InnerText;
                     }
+
+                    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, icon, fileName);
+
+                    //if (iconNode != null)
+                    //{
+                    //    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, iconNode.InnerText);
+                    //}
+                    //else
+                    //{
+                    //    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText);
+                    //}
 
 
                     if (itemNode.Attributes["color"] != null)
@@ -340,7 +400,7 @@ namespace TrayToolbar
             }
         }
 
-        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "")
+        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd")
         {
             ActionIconButton actionIconButton = new(text, false);
             //actionIconButton.Height = itemHeight;
@@ -359,6 +419,8 @@ namespace TrayToolbar
             }
 
 
+
+            actionIconButton.FileName = fileName;
 
 
             //actionIconButton.Text = item;
@@ -405,12 +467,33 @@ namespace TrayToolbar
                 //Mouse.OverrideCursor = null;
             }
 
+            var btn = ((ActionIconButton)sender);
+            var cmd = btn.Command;
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
-            processStartInfo.FileName = "cmd";
-            processStartInfo.Arguments = "/c \"" + ((ActionIconButton)sender).Command + "\"";
+            //processStartInfo.FileName = "cmd";
+            processStartInfo.FileName = btn.FileName;
+            //processStartInfo.Arguments = "/c \"" + ((ActionIconButton)sender).Command + "\"";
+            //processStartInfo.Arguments = ((ActionIconButton)sender).Command;
+            
+            if(cmd.Contains("&"))
+                processStartInfo.Arguments = "/c " + cmd;
+            else processStartInfo.Arguments = "/c \"" + cmd + "\"";
+
+
             //processStartInfo.UseShellExecute = true;
             //processStartInfo.RedirectStandardOutput = true;
-            processStartInfo.CreateNoWindow = true;
+            if (cmd.ToLower().Contains("pause") || cmd.ToUpper().Contains("!SHOWWND"))
+            {
+                processStartInfo.CreateNoWindow = false;
+                cmd?.Replace("!SHOWWND", "");
+            }
+            else
+            {
+                processStartInfo.CreateNoWindow = true;
+            }
+
+            //processStartInfo.CreateNoWindow = false;
+
             Process.Start(processStartInfo);
             //Process.Start("cmd");
             //Cursor = Cursors.Arrow;
@@ -432,7 +515,16 @@ namespace TrayToolbar
             //Clean up file path so it can be navigated OK
             //filePath = System.IO.Path.GetFullPath(filePath);
 
-            System.Diagnostics.Process.Start("explorer.exe", string.Format("/select,\"{0}\"", "test.xml"));
+            //System.Diagnostics.Process.Start("explorer.exe", string.Format("/select,\"{0}\"", "test.xml"));
+
+            ProcessStartInfo startInfo = new ProcessStartInfo();
+            startInfo.FileName = "OpenWith.exe";
+            //startInfo.Arguments = "\"" + System.IO.Path.Combine(Environment.CurrentDirectory, "test.xml") + "\"";
+            startInfo.Arguments = "\"" + xmlFile + "\"";
+            //startInfo.WorkingDirectory =;
+
+            //Process.Start("OpenWith.exe", "test.xml");
+            Process.Start(startInfo);
 
             //return true;
         }
