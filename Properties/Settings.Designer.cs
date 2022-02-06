@@ -34,5 +34,17 @@ namespace TrayToolbar.Properties {
                 this["Path"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool showOnlyFiles {
+            get {
+                return ((bool)(this["showOnlyFiles"]));
+            }
+            set {
+                this["showOnlyFiles"] = value;
+            }
+        }
     }
 }

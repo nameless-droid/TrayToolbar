@@ -80,6 +80,18 @@ namespace TrayToolbar
         //    //Properties.Settings.Default.Path = "E:\Users\Anwender\Desktop\⠀";
         }
 
+        private void ShowOnlyFiles_Checked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.showOnlyFiles = true;
+            Properties.Settings.Default.Save();
+        }
+
+        private void ShowOnlyFiles_Unchecked(object sender, RoutedEventArgs e)
+        {
+            Properties.Settings.Default.showOnlyFiles = false;
+            Properties.Settings.Default.Save();
+        }
+
         //private void SetAppSetting(Properties.Settings path, string text)
         //{
         //    path = text;

@@ -39,6 +39,8 @@ namespace TrayToolbar
         {
             InitializeComponent();
 
+            PreviewKeyDown += MainWindow_PreviewKeyDown;
+
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
             currentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
@@ -95,6 +97,16 @@ namespace TrayToolbar
 
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         }
+
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F5)
+            {
+                CreateButtons();
+            }
+        }
+
+        
 
         private void CurrentDomain_FirstChanceException(object? sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
         {
@@ -260,6 +272,12 @@ namespace TrayToolbar
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            CreateButtons();
+        }
+
+        private void CreateButtons()
+        {
+            stackPanel.Children.Clear();
 
             //*
             List<string> ignoreFiles = new List<string>();
@@ -320,6 +338,9 @@ namespace TrayToolbar
 
         private void CreateButtonsFromXML()
         {
+            if (Properties.Settings.Default.showOnlyFiles)
+                return;
+
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlFile);
             XmlNodeList? itemNodes = xmlDoc.SelectNodes("//buttons/button");
@@ -633,6 +654,11 @@ namespace TrayToolbar
         private void Minimize_Click(object sender, RoutedEventArgs e)
         {
             this.Visibility = Visibility.Hidden;
+        }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            CreateButtons();
         }
     }
 }

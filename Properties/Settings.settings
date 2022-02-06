@@ -5,5 +5,8 @@
     <Setting Name="Path" Type="System.String" Scope="User">
       <Value Profile="(Default)">E:\Users\Anwender\Desktop\⠀</Value>
     </Setting>
+    <Setting Name="showOnlyFiles" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
