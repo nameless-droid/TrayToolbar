@@ -410,7 +410,8 @@ namespace TrayToolbar
 
         private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
-            foreach (string item in Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀"))
+            foreach (string item in Directory.GetFiles(Properties.Settings.Default.Path))
+            //foreach (string item in Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀"))
             //foreach (string item in Directory.GetFiles(@"E:\Visual Studio Test\StylingOfStuff\bin\Debug\Test"))
             {
 
@@ -614,7 +615,7 @@ namespace TrayToolbar
             //filePath = System.IO.Path.GetFullPath(filePath);
 
             //System.Diagnostics.Process.Start("explorer.exe", string.Format("/select,\"{0}\"", "test.xml"));
-
+            /*
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.FileName = "OpenWith.exe";
             //startInfo.Arguments = "\"" + System.IO.Path.Combine(Environment.CurrentDirectory, "test.xml") + "\"";
@@ -623,7 +624,9 @@ namespace TrayToolbar
 
             //Process.Start("OpenWith.exe", "test.xml");
             Process.Start(startInfo);
-
+            */
+            SettingsWnd settings = new SettingsWnd();
+            settings.Show();
             //return true;
         }
 
