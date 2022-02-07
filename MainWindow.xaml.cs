@@ -279,12 +279,16 @@ namespace TrayToolbar
         {
             stackPanel.Children.Clear();
 
+
+
             //*
             List<string> ignoreFiles = new List<string>();
             /////////
             XmlDocument xmlDoc1 = new XmlDocument();
             //xmlDoc1.Load("test.xml");
-            xmlDoc1.Load(xmlFile);
+            if (File.Exists(xmlFile))
+                xmlDoc1.Load(xmlFile);
+
             XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
 
             foreach (XmlNode itemNode in itemNodes1)
@@ -298,10 +302,12 @@ namespace TrayToolbar
 
 
             XmlDocument xmlDoc2 = new XmlDocument();
-            xmlDoc2.Load(xmlFile);
+            if (File.Exists(xmlFile))
+                xmlDoc2.Load(xmlFile);
+
             XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
 
-            if (itemNode1.Attributes != null)
+            if (itemNode1 != null && itemNode1.Attributes != null)
             {
                 if (itemNode1.Attributes["after"].Value.Equals("true"))
                 {
@@ -339,6 +345,9 @@ namespace TrayToolbar
         private void CreateButtonsFromXML()
         {
             if (Properties.Settings.Default.showOnlyFiles)
+                return;
+
+            if (!File.Exists(xmlFile))
                 return;
 
             XmlDocument xmlDoc = new XmlDocument();
@@ -431,6 +440,11 @@ namespace TrayToolbar
 
         private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
+
+            if (!Directory.Exists(Properties.Settings.Default.Path))
+                //Properties.Settings.Default.Path = AppDomain.CurrentDomain.BaseDirectory;
+                return;
+
             foreach (string item in Directory.GetFiles(Properties.Settings.Default.Path))
             //foreach (string item in Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀"))
             //foreach (string item in Directory.GetFiles(@"E:\Visual Studio Test\StylingOfStuff\bin\Debug\Test"))
