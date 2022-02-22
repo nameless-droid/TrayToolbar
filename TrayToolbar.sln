@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31825.309
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31321.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrayToolbar", "TrayToolbar.csproj", "{5F77E5BE-CC05-42FC-BBF2-36F7F99F84B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrayToolbar", "TrayToolbar.csproj", "{EFFB9D73-C6AF-4C25-A12D-6D1507CB9204}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5F77E5BE-CC05-42FC-BBF2-36F7F99F84B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5F77E5BE-CC05-42FC-BBF2-36F7F99F84B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5F77E5BE-CC05-42FC-BBF2-36F7F99F84B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5F77E5BE-CC05-42FC-BBF2-36F7F99F84B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFFB9D73-C6AF-4C25-A12D-6D1507CB9204}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFFB9D73-C6AF-4C25-A12D-6D1507CB9204}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFFB9D73-C6AF-4C25-A12D-6D1507CB9204}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFFB9D73-C6AF-4C25-A12D-6D1507CB9204}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {67CDEFA8-DF4D-438F-8EF2-4E9A22FDD88C}
+		SolutionGuid = {6097D088-EA38-4F1B-849C-9BFBBE8F9590}
 	EndGlobalSection
 EndGlobal

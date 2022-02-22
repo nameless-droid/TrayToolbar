@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "TrayToolbar": {
-      "commandName": "Project",
-      "commandLineArgs": ""
-    }
-  }
-}
