@@ -108,7 +108,7 @@ namespace TrayToolbar
 
         
 
-        private void CurrentDomain_FirstChanceException(object? sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+        private void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
         {
             //File.Create("ddddd124.txt");
 
@@ -289,7 +289,7 @@ namespace TrayToolbar
             if (File.Exists(xmlFile))
                 xmlDoc1.Load(xmlFile);
 
-            XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
+            XmlNodeList itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
 
             foreach (XmlNode itemNode in itemNodes1)
             {
@@ -305,7 +305,7 @@ namespace TrayToolbar
             if (File.Exists(xmlFile))
                 xmlDoc2.Load(xmlFile);
 
-            XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
+            XmlNode itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
 
             if (itemNode1 != null && itemNode1.Attributes != null)
             {
@@ -352,7 +352,7 @@ namespace TrayToolbar
 
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlFile);
-            XmlNodeList? itemNodes = xmlDoc.SelectNodes("//buttons/button");
+            XmlNodeList itemNodes = xmlDoc.SelectNodes("//buttons/button");
 
             int index = 0;
             foreach (XmlNode itemNode in itemNodes)
@@ -466,7 +466,7 @@ namespace TrayToolbar
 
         private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false)
         {
-            ActionIconButton actionIconButton = new(text, false);
+            ActionIconButton actionIconButton = new ActionIconButton(text, false);
             //actionIconButton.Height = itemHeight;
             actionIconButton.SetHeight(itemHeight);
 
@@ -606,12 +606,12 @@ namespace TrayToolbar
             //p.Close();
         }
 
-        private void P_Disposed(object? sender, EventArgs e)
+        private void P_Disposed(object sender, EventArgs e)
         {
             throw new NotImplementedException();
         }
 
-        private void P_Exited(object? sender, EventArgs e)
+        private void P_Exited(object sender, EventArgs e)
         {
             Process p = (Process)sender;
             for (int i = 0; i < activeProcesses.Count; i++)
