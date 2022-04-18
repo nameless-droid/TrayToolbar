@@ -35,7 +35,8 @@ namespace TrayToolbar
 
         //int itemHeight = 25;
         int itemHeight = 20;
-        string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xml";
+        string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xmlf";
+        string dir = @"E:\Users\Anwender\Desktop\⠀\";
 
         public MainWindow()
         {
@@ -43,14 +44,19 @@ namespace TrayToolbar
 
             if (!File.Exists(xmlFile))
             {
-                File.OpenWrite("default.xml");
+                //File.OpenWrite("default.xml");
+                using (FileStream sr = File.OpenWrite("default.xml"))
+                {
+
+                }
+
                 xmlFile = "default.xml";
             }
 
 
 
             AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
+            currentDomain.UnhandledException += new UnhandledExceptionEventHandler(UnhandledException);
             currentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
 
             //this.Visibility = Visibility.Hidden;
@@ -119,7 +125,7 @@ namespace TrayToolbar
             }
         }
 
-        static void MyHandler(object sender, UnhandledExceptionEventArgs args)
+        static void UnhandledException(object sender, UnhandledExceptionEventArgs args)
         {
             //File.Create("ddddd124.txt");
 
@@ -270,6 +276,24 @@ namespace TrayToolbar
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            CreateButtons();
+        }
+
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F5)
+            {
+                CreateButtons();
+            }
+        }
+
+
+        public void CreateButtons()
+        {
+
+            stackPanel.Children.Clear();
+            xml_sp.Children.Clear();
+            //stackPanel.Children.Add(new System.Windows.Controls.TextBlock());
 
             //*
             List<string> ignoreFiles = new List<string>();
@@ -288,12 +312,27 @@ namespace TrayToolbar
                 }
             }
 
-            CreatButtonsFromFiles(ignoreFiles);
+
 
 
             XmlDocument xmlDoc2 = new XmlDocument();
             xmlDoc2.Load(xmlFile);
             XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
+
+
+            foreach (XmlAttribute attr in itemNode1.Attributes)
+            {
+                if (attr.Name == "path")
+                {
+                    if (Directory.Exists(attr.InnerXml))
+                    {
+                        dir = attr.InnerXml;
+                    }
+                }
+            }
+
+            CreatButtonsFromFiles(ignoreFiles);
+
 
             if (itemNode1.Attributes != null)
             {
@@ -420,8 +459,6 @@ namespace TrayToolbar
             }
         }
 
-        string dir = @"E:\Users\Anwender\Desktop\⠀\";
-
         private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
             #region
@@ -475,7 +512,18 @@ namespace TrayToolbar
 
             //
 
-            List<string>? orderedFiles = File.ReadAllLines("order")?.ToList();
+            //List<string>? orderedFiles = File.ReadAllLines("order")?.ToList();
+            List<string>? orderedFiles;
+            try
+            {
+                orderedFiles = File.ReadAllLines(Path.Combine(dir, "order"))?.ToList();
+            }
+            catch (Exception)
+            {
+
+                orderedFiles = null;
+            }
+
 
             List<string> files = Directory.GetFiles(dir).ToList();
             List<string> filescopy = Directory.GetFiles(dir).ToList();
@@ -497,6 +545,8 @@ namespace TrayToolbar
                         continue;
 
                     string filePath = Path.Combine(dir, fileName);
+
+                    //if (File.Exists(filePath))
                     CreateButtonAndAddToStackPanel(filePath, fileName);
                 }
             }
@@ -866,7 +916,7 @@ namespace TrayToolbar
                 int i = 0;
                 //File file = File.CreateText("order");
                 //using(StreamWriter sw = new StreamWriter(xmlFile))
-                using (StreamWriter sw = File.CreateText("order"))
+                using (StreamWriter sw = File.CreateText(Path.Combine(dir, "order")))
                     foreach (ActionIconButton child in stackPanel.Children)
                     {
                         if(!child.FromXML)

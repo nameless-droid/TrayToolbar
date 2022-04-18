@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TrayToolbar"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStyle="None" Background="Transparent" AllowsTransparency="True">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStyle="None" Background="Transparent" AllowsTransparency="True" PreviewKeyDown="MainWindow_PreviewKeyDown">
     <!--<WindowChrome.WindowChrome>
         <WindowChrome NonClientFrameEdges="None" GlassFrameThickness="0" ResizeBorderThickness="7" CaptionHeight="18" CornerRadius="0"></WindowChrome>
     </WindowChrome.WindowChrome>-->
