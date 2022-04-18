@@ -17,6 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using Path = System.IO.Path;
+using Settings = TrayToolbar.Properties.Settings;
 
 namespace TrayToolbar
 {
@@ -33,11 +35,16 @@ namespace TrayToolbar
 
         //int itemHeight = 25;
         int itemHeight = 20;
-        string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xml";
+        string xmlFile;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            //string path = Properties.Settings.Default.Path;
+            //string[] pathSplit = path.Split("\\");
+            //xmlFile = Path.Combine(pathSplit[0])
+            xmlFile = Path.Combine(Properties.Settings.Default.Path, Settings.Default.xmlFileName + ".xml");
 
             PreviewKeyDown += MainWindow_PreviewKeyDown;
 
@@ -672,6 +679,7 @@ namespace TrayToolbar
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
+            xmlFile = Path.Combine(Properties.Settings.Default.Path, Settings.Default.xmlFileName + ".xml");
             CreateButtons();
         }
     }

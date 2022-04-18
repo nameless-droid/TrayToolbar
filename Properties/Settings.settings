@@ -6,7 +6,10 @@
       <Value Profile="(Default)">E:\\Users\\Anwender\\Desktop\\⠀</Value>
     </Setting>
     <Setting Name="showOnlyFiles" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="xmlFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">config</Value>
     </Setting>
   </Settings>
 </SettingsFile>

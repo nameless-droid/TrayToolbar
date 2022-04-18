@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -47,7 +48,6 @@ namespace TrayToolbar
                 tb_path.Text = openFileDlg.FileName;
                 Properties.Settings.Default.Path = openFileDlg.FileName;
             }
-            */
 
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
@@ -59,6 +59,19 @@ namespace TrayToolbar
                     tb_path.Text = dialog.SelectedPath;
                     Properties.Settings.Default.Path = dialog.SelectedPath;
                 }
+            }
+            tb_path.Text = Properties.Settings.Default.Path;
+            Properties.Settings.Default.Save();
+            */
+
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            //dialog.InitialDirectory = "C:\\Users";
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                //MessageBox.Show("You selected: " + dialog.FileName);
+                //tb_path.Text = dialog.FileName;
+                Properties.Settings.Default.Path = dialog.FileName;
             }
             tb_path.Text = Properties.Settings.Default.Path;
             Properties.Settings.Default.Save();
@@ -90,6 +103,11 @@ namespace TrayToolbar
         {
             Properties.Settings.Default.showOnlyFiles = false;
             Properties.Settings.Default.Save();
+        }
+
+        private void ChangeXMLFileName_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         //private void SetAppSetting(Properties.Settings path, string text)
