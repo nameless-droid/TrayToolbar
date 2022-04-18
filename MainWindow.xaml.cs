@@ -280,6 +280,8 @@ namespace TrayToolbar
                 }
             }
 
+            CreatButtonsFromFiles(ignoreFiles);
+
 
             XmlDocument xmlDoc2 = new XmlDocument();
             xmlDoc2.Load(xmlFile);
@@ -289,19 +291,19 @@ namespace TrayToolbar
             {
                 if (itemNode1.Attributes["after"].Value.Equals("true"))
                 {
-                    CreatButtonsFromFiles(ignoreFiles);
+                    //CreatButtonsFromFiles(ignoreFiles);
                     CreateButtonsFromXML();
                 }
                 else
                 {
                     CreateButtonsFromXML();
-                    CreatButtonsFromFiles(ignoreFiles);
+                    //CreatButtonsFromFiles(ignoreFiles);
                 }
             }
             else
             {
                 CreateButtonsFromXML();
-                CreatButtonsFromFiles(ignoreFiles);
+                //CreatButtonsFromFiles(ignoreFiles);
             }
 
             //foreach (XmlNode itemNode in itemNodes1)
@@ -410,16 +412,21 @@ namespace TrayToolbar
             }
         }
 
+        string dir = @"E:\Users\Anwender\Desktop\⠀\";
+
         private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
+            #region
+            /*
             //DirectoryInfo directory = new DirectoryInfo(@"E:\Users\Anwender\Desktop\⠀");
             //FileInfo[] files = directory.GetFiles();
 
             ////var sorted = files.OrderBy(f => );
             ////var orderedNodes = parent.Elements().OrderBy(f => f.Name.LocalName, new NodeComparer());
             //var filtered = files.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden));
-            var dir = @"E:\Users\Anwender\Desktop\⠀\";
-            List<string> files = Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀").ToList();
+
+            //List<string> files = Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀").ToList();
+            List<string> files = Directory.GetFiles(dir).ToList();
             //files.OrderBy(f => f).ToList();
             //files = files.OrderBy(f => Regex.Replace(f, @"~[\d-]", string.Empty)).ToList();
 
@@ -435,6 +442,7 @@ namespace TrayToolbar
                 //{
                 //    ;
                 //}
+                /*
                 var item1 = item;
                 if (item.StartsWith("~"))
                 {
@@ -444,14 +452,60 @@ namespace TrayToolbar
                 {
                     File.Move(dir + item, dir + "~" + count + Path.GetFileNameWithoutExtension(item) + Path.GetExtension(item));
                     count++;
-                }
+                }*/
 
-                if (ignoreFiles.Contains(System.IO.Path.GetFileName(item1)))
+            /*
+
+                if (ignoreFiles.Contains(System.IO.Path.GetFileName(item)))
                     continue;
 
-                string text = System.IO.Path.GetFileName(item1);
-                CreateButtonAndAddToStackPanel(item1, text);
+                string text = System.IO.Path.GetFileName(item);
+                CreateButtonAndAddToStackPanel(item, text);
             }
+            */
+            #endregion
+
+            //
+
+            List<string>? orderedFiles = File.ReadAllLines("order")?.ToList();
+
+            List<string> files = Directory.GetFiles(dir).ToList();
+            List<string> filescopy = Directory.GetFiles(dir).ToList();
+
+            /*
+            bool newFile = false;
+
+            foreach (var item in orderedFiles)
+            {
+                newFile = filescopy.Remove(item);
+                if (newFile) break;
+            }*/
+
+            if (orderedFiles != null)
+            {
+                foreach (var fileName in orderedFiles)
+                {
+                    if (ignoreFiles.Contains(System.IO.Path.GetFileName(fileName)))
+                        continue;
+
+                    string filePath = Path.Combine(dir, fileName);
+                    CreateButtonAndAddToStackPanel(filePath, fileName);
+                }
+            }
+            else
+            {
+                int count = 0;
+                foreach (string item in files)
+                {
+                    if (ignoreFiles.Contains(System.IO.Path.GetFileName(item)))
+                        continue;
+
+                    string text = System.IO.Path.GetFileName(item);
+                    CreateButtonAndAddToStackPanel(item, text);
+                }
+            }
+
+
         }
 
         private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false, bool xml = false)
@@ -684,11 +738,21 @@ namespace TrayToolbar
             }
         }
 
+        
         private void stackPanel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            _isDown = false;
-            _isDragging = false;
-            _realDragSource.ReleaseMouseCapture();
+            try
+            {
+                _isDown = false;
+                _isDragging = false;
+                _realDragSource.ReleaseMouseCapture();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
 
         private void stackPanel_PreviewMouseMove(object sender, MouseEventArgs e)
@@ -741,12 +805,18 @@ namespace TrayToolbar
 
                 SaveNewOrder(droptarget as ActionIconButton);
             }
+
+            //_isDown = false;
+            //_isDragging = false;
+            //_realDragSource.ReleaseMouseCapture();
         }
 
         private void SaveNewOrder(ActionIconButton btn)
         {
+
             if (btn.FromXML)
             {
+                /*
                 // load xml into document
                 var s = System.Xml.Linq.XDocument.Load(xmlFile);
 
@@ -767,12 +837,25 @@ namespace TrayToolbar
 
                 // save back to localtion
                 s.Save(xmlFile);
+                */
             }
             else
             {
                 //btn.FileName
                 //File.copy
                 //File.Move(btn.FileName, )
+
+                int i = 0;
+                //File file = File.CreateText("order");
+                //using(StreamWriter sw = new StreamWriter(xmlFile))
+                using (StreamWriter sw = File.CreateText("order"))
+                    foreach (ActionIconButton child in stackPanel.Children)
+                    {
+                        if(!child.FromXML)
+                        //sw.WriteLine(child.FileName);
+                        sw.WriteLine(Path.GetFileName(child.Command));
+                    }
+
             }
 
 
@@ -781,6 +864,11 @@ namespace TrayToolbar
         void OrderButtons()
         {
 
+        }
+
+        private void stackPanel_DragLeave(object sender, DragEventArgs e)
+        {
+            stackPanel_PreviewMouseLeftButtonUp(null, null);
         }
     }
 }
