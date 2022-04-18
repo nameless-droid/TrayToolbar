@@ -41,6 +41,14 @@ namespace TrayToolbar
         {
             InitializeComponent();
 
+            if (!File.Exists(xmlFile))
+            {
+                File.OpenWrite("default.xml");
+                xmlFile = "default.xml";
+            }
+
+
+
             AppDomain currentDomain = AppDomain.CurrentDomain;
             currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
             currentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
@@ -537,11 +545,21 @@ namespace TrayToolbar
             //actionIconButton.BG = "#2B2B2B";
             //actionIconButton.LightMode = false;
             actionIconButton.Click += ActionIconButton_Click;
-            stackPanel.Children.Add(actionIconButton);
-            //this.Height = 18 + 33 * stackPanel.Children.Count;
-            this.Height = 18 + itemHeight * stackPanel.Children.Count + 4;
+
+
+            if(xml)
+                xml_sp.Children.Add(actionIconButton);
+            else
+                stackPanel.Children.Add(actionIconButton);
+
+
+            ////this.Height = 18 + 33 * stackPanel.Children.Count;
+            //this.Height = 18 + itemHeight * stackPanel.Children.Count + 4;
+            //this.Width = 250;
+            ////this.Background = actionIconButton.stackpanel.Background;
+
+            this.Height = 18 + (itemHeight * stackPanel.Children.Count + 4) + (itemHeight * xml_sp.Children.Count + 4);
             this.Width = 250;
-            //this.Background = actionIconButton.stackpanel.Background;
 
             actionIconButtonsList.Add(actionIconButton);
 
