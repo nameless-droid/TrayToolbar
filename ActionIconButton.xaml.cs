@@ -21,6 +21,14 @@ namespace TrayToolbar
     /// </summary>
     public partial class ActionIconButton : UserControl
     {
+        bool fromXML;
+        public bool FromXML
+        {
+            get {
+                return fromXML;
+            }
+            set { fromXML = value; }
+        }
 
         public string darkColorString;
         public string darkHoverColorString;

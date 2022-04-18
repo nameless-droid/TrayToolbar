@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
+using Path = System.IO.Path;
 
 namespace TrayToolbar
 {
@@ -367,7 +369,7 @@ namespace TrayToolbar
                         fileName = fileNameNode.InnerText;
                     }
 
-                    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, icon, fileName, hideIfActive);
+                    CreateButtonAndAddToStackPanel(commandNode.InnerText, textNode.InnerText, icon, fileName, hideIfActive, xml: true);
 
                     //if (iconNode != null)
                     //{
@@ -410,25 +412,49 @@ namespace TrayToolbar
 
         private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
-            foreach (string item in Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀"))
+            //DirectoryInfo directory = new DirectoryInfo(@"E:\Users\Anwender\Desktop\⠀");
+            //FileInfo[] files = directory.GetFiles();
+
+            ////var sorted = files.OrderBy(f => );
+            ////var orderedNodes = parent.Elements().OrderBy(f => f.Name.LocalName, new NodeComparer());
+            //var filtered = files.Where(f => !f.Attributes.HasFlag(FileAttributes.Hidden));
+            var dir = @"E:\Users\Anwender\Desktop\⠀\";
+            List<string> files = Directory.GetFiles(@"E:\Users\Anwender\Desktop\⠀").ToList();
+            //files.OrderBy(f => f).ToList();
+            //files = files.OrderBy(f => Regex.Replace(f, @"~[\d-]", string.Empty)).ToList();
+
+            int count = 0;
+            foreach (string item in files)
             //foreach (string item in Directory.GetFiles(@"E:\Visual Studio Test\StylingOfStuff\bin\Debug\Test"))
             {
-
+                //if (File.)
+                //{
+                //}
 
                 //if (item.Contains("shutdown"))
                 //{
                 //    ;
                 //}
+                var item1 = item;
+                if (item.StartsWith("~"))
+                {
+                    item1 = item.Remove(0, 2);
+                }
+                else
+                {
+                    File.Move(dir + item, dir + "~" + count + Path.GetFileNameWithoutExtension(item) + Path.GetExtension(item));
+                    count++;
+                }
 
-                if (ignoreFiles.Contains(System.IO.Path.GetFileName(item)))
+                if (ignoreFiles.Contains(System.IO.Path.GetFileName(item1)))
                     continue;
 
-                string text = System.IO.Path.GetFileName(item);
-                CreateButtonAndAddToStackPanel(item, text);
+                string text = System.IO.Path.GetFileName(item1);
+                CreateButtonAndAddToStackPanel(item1, text);
             }
         }
 
-        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false)
+        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false, bool xml = false)
         {
             ActionIconButton actionIconButton = new(text, false);
             //actionIconButton.Height = itemHeight;
@@ -464,6 +490,9 @@ namespace TrayToolbar
             //this.Background = actionIconButton.stackpanel.Background;
 
             actionIconButtonsList.Add(actionIconButton);
+
+
+            actionIconButton.FromXML = xml;
         }
 
         private async void ActionIconButton_Click(object sender, RoutedEventArgs e)
@@ -630,6 +659,128 @@ namespace TrayToolbar
         private void Minimize_Click(object sender, RoutedEventArgs e)
         {
             this.Visibility = Visibility.Hidden;
+        }
+
+
+
+
+
+        private bool _isDown;
+        private bool _isDragging;
+        private Point _startPoint;
+        private UIElement _realDragSource;
+        private UIElement _dummyDragSource = new UIElement();
+
+        //private void stackPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void stackPanel_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Source == this.stackPanel)
+            {
+            }
+            else
+            {
+                _isDown = true;
+                _startPoint = e.GetPosition(this.stackPanel);
+            }
+        }
+
+        private void stackPanel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            _isDown = false;
+            _isDragging = false;
+            _realDragSource.ReleaseMouseCapture();
+        }
+
+        private void stackPanel_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isDown)
+            {
+                if ((_isDragging == false) && ((Math.Abs(e.GetPosition(this.stackPanel).X - _startPoint.X) > SystemParameters.MinimumHorizontalDragDistance) ||
+                    (Math.Abs(e.GetPosition(this.stackPanel).Y - _startPoint.Y) > SystemParameters.MinimumVerticalDragDistance)))
+                {
+                    _isDragging = true;
+                    _realDragSource = e.Source as UIElement;
+                    _realDragSource.CaptureMouse();
+                    DragDrop.DoDragDrop(_dummyDragSource, new DataObject("UIElement", e.Source, true), DragDropEffects.Move);
+                }
+            }
+        }
+
+        private void stackPanel_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("UIElement"))
+            {
+                e.Effects = DragDropEffects.Move;
+            }
+        }
+
+        private void stackPanel_Drop(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("UIElement"))
+            {
+                UIElement droptarget = e.Source as UIElement;
+                int droptargetIndex = -1, i = 0;
+                foreach (UIElement element in this.stackPanel.Children)
+                {
+                    if (element.Equals(droptarget))
+                    {
+                        droptargetIndex = i;
+                        break;
+                    }
+                    i++;
+                }
+                if (droptargetIndex != -1)
+                {
+                    this.stackPanel.Children.Remove(_realDragSource);
+                    this.stackPanel.Children.Insert(droptargetIndex, _realDragSource);
+                }
+
+                _isDown = false;
+                _isDragging = false;
+                _realDragSource.ReleaseMouseCapture();
+
+                SaveNewOrder(droptarget as ActionIconButton);
+            }
+        }
+
+        private void SaveNewOrder(ActionIconButton btn)
+        {
+            if (btn.FromXML)
+            {
+                // load xml into document
+                var s = System.Xml.Linq.XDocument.Load(xmlFile);
+
+                // get the parent node
+                var parent = s.Elements().FirstOrDefault();
+
+                //// reorder nodes
+                //var orderedNodes = parent.Elements().OrderBy(f => f.Name.LocalName, new NodeComparer());
+
+                //// replace nodes
+                //parent.ReplaceNodes(orderedNodes);
+
+                // reorder nodes
+                var orderedNodes = parent.Elements().OrderBy(f => f.Name.LocalName, new NodeComparer());
+
+                // replace nodes
+                parent.ReplaceNodes(orderedNodes);
+
+                // save back to localtion
+                s.Save(xmlFile);
+            }
+            else
+            {
+                //btn.FileName
+                //File.copy
+                //File.Move(btn.FileName, )
+            }
+
+
+        }
+
+        void OrderButtons()
+        {
+
         }
     }
 }

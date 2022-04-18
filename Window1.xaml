@@ -1,0 +1,15 @@
+﻿<Window x:Class="TrayToolbar.Window1"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TrayToolbar"
+        mc:Ignorable="d"
+        Title="Window1" Height="450" Width="800">
+    <!--<StackPanel Name="sp" AllowDrop="True" Background="SkyBlue" PreviewMouseLeftButtonDown="sp_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="sp_PreviewMouseLeftButtonUp" PreviewMouseMove="sp_PreviewMouseMove" DragEnter="sp_DragEnter" Drop="sp_Drop">-->
+    <StackPanel Name="sp" AllowDrop="True" Background="SkyBlue" PreviewMouseLeftButtonDown="sp_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="sp_PreviewMouseLeftButtonUp" PreviewMouseMove="sp_PreviewMouseMove" DragEnter="sp_DragEnter" Drop="sp_Drop">
+        <Button Content="button 1"   HorizontalAlignment="Center" Height="50" Width="200" />
+        <Button Content="button 2"   HorizontalAlignment="Center" Height="50" Width="200"/>
+        <Button Content="button 3"   HorizontalAlignment="Center" Height="50" Width="200"/>
+    </StackPanel>
+</Window>
