@@ -42,6 +42,7 @@ namespace TrayToolbar
         {
             InitializeComponent();
 
+            /*
             if (!File.Exists(xmlFile))
             {
                 //File.OpenWrite("default.xml");
@@ -51,8 +52,17 @@ namespace TrayToolbar
                 }
 
                 xmlFile = "default.xml";
-            }
+            }*/
 
+
+            //GetXmlFile(Path.Combine(Directory.GetCurrentDirectory(), "items.xml"), 0);
+            GetXmlFile(Directory.GetCurrentDirectory(), 0);
+
+            var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+            //if(exeDir != null)
+                //GetXmlFile(Path.Combine(exeDir, "items.xml"), 0);
+                //GetXmlFile(Path.Combine(exeDir), 0);
 
 
             AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -110,6 +120,75 @@ namespace TrayToolbar
             //}
 
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+        }
+
+
+        private void GetXmlFile(string s, int count)
+        {
+            //var file = "items.xml";
+            if (File.Exists(Path.Combine(s, "items.xml")))
+            {
+                //xmlFile = s;
+                xmlFile = Path.Combine(s, "items.xml");
+            }
+            else
+            {
+                //foreach (var item in Directory.GetFiles(Directory.GetCurrentDirectory()))
+                foreach (var fileName in Directory.GetFiles(Path.GetDirectoryName(s)))
+                {
+                    if (fileName.Equals("items.xml"))
+                    //if (Path.GetFileName(fileName).Equals("items.xml"))
+                    {
+                        xmlFile = s;
+                        return;
+                    }
+                    //count++;
+                    //GetXmlFile(System.IO.Path.GetFileName(fileName), count);
+                    //GetXmlFile(Path.GetDirectoryName(s), count++);
+                    //GetXmlFile(s + @"\..\", count++);
+                }
+
+                try
+                {
+                    if (Directory.GetParent(Path.GetDirectoryName(s)) != null)
+                    {
+                        GetXmlFile(Directory.GetParent(Path.GetDirectoryName(s)).FullName, count++);
+                    }
+
+                }
+                catch (Exception)
+                {
+
+                    //throw;
+                }
+            }
+
+            if (count >= 4)
+            {
+                /*
+                using (FileStream sr = File.OpenWrite("default.xml"))
+                {
+                    sr.Write()
+                }*/
+
+                using (StreamWriter sw = File.CreateText("items.xml"))
+                {
+                    //sw.WriteLine(@"<buttons after='false' path='.'>");
+                    //sw.Write(@"<button>\n        <text>Example Item (opens cmd)</text>\n        <icon>C:\WINDOWS\system32\cmd.exe</icon>\");
+                    sw.Write(@"<buttons after='false' path='.'>
+    <button>
+        <text>Example Item (opens cmd)</text>
+        <command>start cmd</command>
+        <!-- <command>cmd !SHOWWND</command> -->
+        <icon>C:\WINDOWS\system32\cmd.exe</icon>
+        <fileName>cmd</fileName>
+    </button>
+</buttons>");
+                    //sw.WriteLine(@"</buttons>");
+                }
+
+                xmlFile = "items.xml";
+            }
         }
 
         private void CurrentDomain_FirstChanceException(object? sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
@@ -527,15 +606,49 @@ namespace TrayToolbar
 
             List<string> files = Directory.GetFiles(dir).ToList();
             List<string> filescopy = Directory.GetFiles(dir).ToList();
+            //files = files.OrderBy(f => Regex.Replace(f, @"~[\d-]", string.Empty)).ToList();
+            //files = files. (f => f.Replace(dir, "")).ToList();
+
+            for (int i = 0; i < filescopy.Count; i++)
+            {
+                //var f = filescopy[i];
+                //f = f.Replace(dir, "");
+                filescopy[i] = Path.GetFileName(filescopy[i]);
+            }
+
+            filescopy.Remove("order");
+
 
             /*
             bool newFile = false;
 
-            foreach (var item in orderedFiles)
+
+            //foreach (string file in filescopy)  
+            if (orderedFiles != null)
+                foreach (var item in orderedFiles)
+                {
+                    newFile = filescopy.Remove(item);
+                    if (newFile) break;
+                }
+
+
+            //if (newFile)
+            if (filescopy.Count > 0)
             {
-                newFile = filescopy.Remove(item);
-                if (newFile) break;
-            }*/
+                //orderedFiles.AddRange(filescopy);
+                orderedFiles.AddRange(filescopy);
+            }
+            */
+
+            //if (orderedFiles != null)
+            //orderedFiles = filescopy.Except(orderedFiles).ToList();
+
+            filescopy = filescopy.Except(orderedFiles).ToList();
+
+            if (filescopy.Count > 0)
+            {
+                orderedFiles.AddRange(filescopy);
+            }
 
             if (orderedFiles != null)
             {
@@ -546,7 +659,7 @@ namespace TrayToolbar
 
                     string filePath = Path.Combine(dir, fileName);
 
-                    //if (File.Exists(filePath))
+                    if (File.Exists(filePath))
                     CreateButtonAndAddToStackPanel(filePath, fileName);
                 }
             }
@@ -818,7 +931,7 @@ namespace TrayToolbar
             catch (Exception)
             {
 
-                throw;
+                //throw;
             }
 
         }
@@ -879,7 +992,7 @@ namespace TrayToolbar
             //_realDragSource.ReleaseMouseCapture();
         }
 
-        private void SaveNewOrder(ActionIconButton btn)
+        private async void SaveNewOrder(ActionIconButton btn)
         {
 
             if (btn.FromXML)
@@ -916,14 +1029,31 @@ namespace TrayToolbar
                 int i = 0;
                 //File file = File.CreateText("order");
                 //using(StreamWriter sw = new StreamWriter(xmlFile))
-                using (StreamWriter sw = File.CreateText(Path.Combine(dir, "order")))
+                var filePath = Path.Combine(dir, "order");
+
+                if (File.Exists(filePath))
+                {
+                    File.SetAttributes(filePath, File.GetAttributes(filePath) & ~FileAttributes.Hidden);
+                    //await Task.Delay(100);
+                }
+
+
+                //using (StreamWriter sw = File.CreateText(Path.Combine(dir, fileName)))
+                using (StreamWriter sw = File.CreateText(filePath))
+                {
+
                     foreach (ActionIconButton child in stackPanel.Children)
                     {
-                        if(!child.FromXML)
-                        //sw.WriteLine(child.FileName);
-                        sw.WriteLine(Path.GetFileName(child.Command));
+                        if (!child.FromXML)
+                            //sw.WriteLine(child.FileName);
+                            sw.WriteLine(Path.GetFileName(child.Command));
+
                     }
 
+                    File.SetAttributes(filePath, FileAttributes.Hidden);
+                }
+
+                //File.SetAttributes(Path.Combine(dir, "order"), FileAttributes.Hidden);
             }
 
 

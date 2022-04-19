@@ -237,7 +237,8 @@ namespace TrayToolbar
             {
                 ;
                 //filePath = filePath.Substring(2);
-                filePath = filePath.TrimEnd(filePath[^1]);
+                //filePath = filePath.TrimEnd(filePath[^1]);
+                filePath = filePath.TrimEnd(filePath[filePath.Length - 1]);
             }
 
             System.Drawing.Icon icon = System.Drawing.SystemIcons.Application;

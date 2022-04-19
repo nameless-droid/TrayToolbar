@@ -2,13 +2,9 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net5.0-windows;net48</TargetFrameworks>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <!-- <LangVersion>10.0</LangVersion> -->
-    <LangVersion>latest</LangVersion>
-    <!--<LangVersion>preview</LangVersion>-->
-    <!--<LangVersion>7.3</LangVersion>-->
   </PropertyGroup>
 
   <ItemGroup>
