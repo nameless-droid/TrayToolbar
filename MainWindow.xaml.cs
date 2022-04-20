@@ -38,9 +38,70 @@ namespace TrayToolbar
         string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xmlf";
         string dir = @"E:\Users\Anwender\Desktop\⠀\";
 
+
+        public void LoadSettingsAndCreateButtons()
+        {
+            LoadSettings();
+            CreateButtons();
+        }
+
+        private void LoadSettings()
+        {
+            XmlSettings instance = XmlSettings.Instance;
+            instance.Load("settings.xml");
+
+            //
+            XmlDocument xmlDoc2 = new XmlDocument();
+            xmlDoc2.Load(xmlFile);
+            XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
+
+
+            foreach (XmlAttribute attr in itemNode1.Attributes)
+            {
+                if (attr.Name == "path")
+                {
+                    if (Directory.Exists(attr.InnerXml))
+                    {
+                        dir = attr.InnerXml;
+                    }
+                }
+            }
+            //
+
+            dir = instance.GetValueOfSetting("path") ?? dir;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+
+            /*
+            List<Setting> settings = XmlSettings.Load("settings.xml");
+
+            //foreach (Setting setting in settings)
+
+            //if (settings.Contains())
+            if (settings.Any(s => s.Name.Equals("test")))
+            //if (settings.Contains("test"))
+            {
+                ;
+                //MessageBox.Show(settings["test"].Value);
+                Setting setting = settings.Find(s => s.Name.Equals("test"));
+                MessageBox.Show(setting.Value);
+            }
+            */
+            //var t = XmlSettings.Instance;
+            XmlSettings instance = XmlSettings.Instance;
+            instance.Load("settings.xml");
+            var test = XmlSettings.Instance.settings.Find(s => s.Name.Equals("test")).Value;
+            //var test1 = instance.settings.Find(s => s.Name.Equals("path")).Value;
+
+            //dir ??= XmlSettings.Instance.settings.Find(s => s.Name.Equals("path")).Value;
+            //dir = instance.settings.Find(s => s.Name.Equals("path")).Value;
+
+            dir = instance.GetValueOfSetting("path") ?? dir;
+
+            //return;
 
             /*
             if (!File.Exists(xmlFile))
@@ -56,13 +117,15 @@ namespace TrayToolbar
 
 
             //GetXmlFile(Path.Combine(Directory.GetCurrentDirectory(), "items.xml"), 0);
+            //MessageBox.Show("1.", Directory.GetCurrentDirectory());
             GetXmlFile(Directory.GetCurrentDirectory(), 0);
 
             var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            //MessageBox.Show("2.");
 
             //if(exeDir != null)
-                //GetXmlFile(Path.Combine(exeDir, "items.xml"), 0);
-                //GetXmlFile(Path.Combine(exeDir), 0);
+            //GetXmlFile(Path.Combine(exeDir, "items.xml"), 0);
+            //GetXmlFile(Path.Combine(exeDir), 0);
 
 
             AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -125,11 +188,14 @@ namespace TrayToolbar
 
         private void GetXmlFile(string s, int count)
         {
+            //MessageBox.Show(s.ToString() + " --- " + count);
             //var file = "items.xml";
             if (File.Exists(Path.Combine(s, "items.xml")))
             {
                 //xmlFile = s;
                 xmlFile = Path.Combine(s, "items.xml");
+                //MessageBox.Show(xmlFile, "found1");
+                //MessageBox.Show(s, "found2");
             }
             else
             {
@@ -148,12 +214,17 @@ namespace TrayToolbar
                     //GetXmlFile(s + @"\..\", count++);
                 }
 
+                var i = s.LastIndexOf(@"\");
+                s = s.Remove(i, s.Count() - i);
+                //GetXmlFile(Directory.GetParent(Path.GetDirectoryName(s)).FullName, ++count);
+
+                GetXmlFile(s, ++count);
                 try
                 {
-                    if (Directory.GetParent(Path.GetDirectoryName(s)) != null)
-                    {
-                        GetXmlFile(Directory.GetParent(Path.GetDirectoryName(s)).FullName, count++);
-                    }
+                    //if (Directory.GetParent(Path.GetDirectoryName(s)) != null)
+                    //{
+                    //    GetXmlFile(Directory.GetParent(Path.GetDirectoryName(s)).FullName, ++count);
+                    //}
 
                 }
                 catch (Exception)
@@ -321,6 +392,8 @@ namespace TrayToolbar
             this.Visibility = Visibility.Visible;
             this.Topmost = true;
             this.Topmost = false;
+            
+            this.Activate();
         }
         #region dll imports
         [DllImport("user32.dll", SetLastError = true)]
@@ -355,14 +428,16 @@ namespace TrayToolbar
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            CreateButtons();
+            //CreateButtons();
+            LoadSettingsAndCreateButtons();
         }
 
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F5)
             {
-                CreateButtons();
+                //CreateButtons();
+                LoadSettingsAndCreateButtons();
             }
         }
 
@@ -375,6 +450,9 @@ namespace TrayToolbar
             //stackPanel.Children.Add(new System.Windows.Controls.TextBlock());
 
             //*
+
+            //moved to LoadSettings();
+
             List<string> ignoreFiles = new List<string>();
             /////////
             XmlDocument xmlDoc1 = new XmlDocument();
@@ -394,43 +472,51 @@ namespace TrayToolbar
 
 
 
+            //CreatButtonsFromFiles(ignoreFiles);
+
             XmlDocument xmlDoc2 = new XmlDocument();
             xmlDoc2.Load(xmlFile);
             XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
 
-
-            foreach (XmlAttribute attr in itemNode1.Attributes)
-            {
-                if (attr.Name == "path")
-                {
-                    if (Directory.Exists(attr.InnerXml))
-                    {
-                        dir = attr.InnerXml;
-                    }
-                }
-            }
-
-            CreatButtonsFromFiles(ignoreFiles);
-
-
-            if (itemNode1.Attributes != null)
+            //if (itemNode1.Attributes != null)
+            if (itemNode1.Attributes["after"] != null)
             {
                 if (itemNode1.Attributes["after"].Value.Equals("true"))
                 {
                     //CreatButtonsFromFiles(ignoreFiles);
+                    //CreateButtonsFromXML();
+                    all_sp.Children.Remove(sep);
+                    all_sp.Children.Add(sep);
+                    all_sp.Children.Remove(xml_sp);
+                    all_sp.Children.Add(xml_sp);
+                    CreatButtonsFromFiles(ignoreFiles);
                     CreateButtonsFromXML();
                 }
                 else
                 {
-                    CreateButtonsFromXML();
+                    //CreateButtonsFromXML();
                     //CreatButtonsFromFiles(ignoreFiles);
+                    all_sp.Children.Remove(sep);
+                    all_sp.Children.Add(sep);
+                    all_sp.Children.Remove(stackPanel);
+                    all_sp.Children.Add(stackPanel);
+                    CreateButtonsFromXML();
+                    CreatButtonsFromFiles(ignoreFiles);
                 }
             }
             else
             {
+                all_sp.Children.Remove(sep);
+                all_sp.Children.Add(sep);
+                all_sp.Children.Remove(stackPanel);
+                all_sp.Children.Add(stackPanel);
                 CreateButtonsFromXML();
-                //CreatButtonsFromFiles(ignoreFiles);
+                CreatButtonsFromFiles(ignoreFiles);
             }
+
+            //CreatButtonsFromFiles(ignoreFiles);
+            //CreateButtonsFromXML();
+
 
             //foreach (XmlNode itemNode in itemNodes1)
             //{
@@ -643,12 +729,16 @@ namespace TrayToolbar
             //if (orderedFiles != null)
             //orderedFiles = filescopy.Except(orderedFiles).ToList();
 
-            filescopy = filescopy.Except(orderedFiles).ToList();
-
-            if (filescopy.Count > 0)
+            if (orderedFiles != null)
             {
-                orderedFiles.AddRange(filescopy);
+                filescopy = filescopy.Except(orderedFiles).ToList();
+
+                if (filescopy.Count > 0)
+                {
+                    orderedFiles.AddRange(filescopy);
+                }
             }
+
 
             if (orderedFiles != null)
             {

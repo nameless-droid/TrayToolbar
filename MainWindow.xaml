@@ -44,11 +44,11 @@
                     <Button FocusVisualStyle="{x:Null}" ClipToBounds="True" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>
                 </StackPanel>
             </Border>
-            <StackPanel x:Name="all_sp" Orientation="Vertical">
+            <StackPanel x:Name="all_sp" Orientation="Vertical" Margin="0,18,0,0">
                 <StackPanel DragLeave="stackPanel_DragLeave" PreviewMouseLeftButtonDown="stackPanel_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="stackPanel_PreviewMouseLeftButtonUp"
                     PreviewMouseMove="stackPanel_PreviewMouseMove" DragEnter="stackPanel_DragEnter" Drop="stackPanel_Drop"
-                    AllowDrop="True" x:Name="stackPanel" Margin="0,18,0,0"></StackPanel>
-                <Separator></Separator>
+                    AllowDrop="True" x:Name="stackPanel" Margin="0,0,0,0"></StackPanel>
+                <Separator x:Name="sep"></Separator>
                 <StackPanel x:Name="xml_sp" Margin="0,0,0,0"></StackPanel>
             </StackPanel>
             <tb:TaskbarIcon x:Name="myNotifyIcon"
