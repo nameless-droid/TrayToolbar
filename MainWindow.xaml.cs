@@ -68,7 +68,38 @@ namespace TrayToolbar
             }
             //
 
+
+
+            List<string> ignoreFiles = new List<string>();
+            /////////
+            XmlDocument xmlDoc1 = new XmlDocument();
+            //xmlDoc1.Load("test.xml");
+            xmlDoc1.Load(xmlFile);
+            XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
+
+            foreach (XmlNode itemNode in itemNodes1)
+            {
+                XmlNode textNode = itemNode.SelectSingleNode("text");
+                if ((textNode != null))
+                {
+                    ignoreFiles.Add(textNode.InnerText);
+                }
+            }
+            Order(ignoreFiles);
+
+
+            // Settings File
             dir = instance.GetValueOfSetting("path") ?? dir;
+
+            var xmlAboveFiles = instance.GetValueOfSetting("xmlAboveFiles");
+            if (xmlAboveFiles != null)
+            {
+                if (xmlAboveFiles == "true")
+                    SetXmlBelowFiles(ignoreFiles);
+                else if(xmlAboveFiles == "false")
+                    SetXmlBelowFiles(ignoreFiles);
+            }
+
         }
 
         public MainWindow()
@@ -474,45 +505,7 @@ namespace TrayToolbar
 
             //CreatButtonsFromFiles(ignoreFiles);
 
-            XmlDocument xmlDoc2 = new XmlDocument();
-            xmlDoc2.Load(xmlFile);
-            XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
-
-            //if (itemNode1.Attributes != null)
-            if (itemNode1.Attributes["after"] != null)
-            {
-                if (itemNode1.Attributes["after"].Value.Equals("true"))
-                {
-                    //CreatButtonsFromFiles(ignoreFiles);
-                    //CreateButtonsFromXML();
-                    all_sp.Children.Remove(sep);
-                    all_sp.Children.Add(sep);
-                    all_sp.Children.Remove(xml_sp);
-                    all_sp.Children.Add(xml_sp);
-                    CreatButtonsFromFiles(ignoreFiles);
-                    CreateButtonsFromXML();
-                }
-                else
-                {
-                    //CreateButtonsFromXML();
-                    //CreatButtonsFromFiles(ignoreFiles);
-                    all_sp.Children.Remove(sep);
-                    all_sp.Children.Add(sep);
-                    all_sp.Children.Remove(stackPanel);
-                    all_sp.Children.Add(stackPanel);
-                    CreateButtonsFromXML();
-                    CreatButtonsFromFiles(ignoreFiles);
-                }
-            }
-            else
-            {
-                all_sp.Children.Remove(sep);
-                all_sp.Children.Add(sep);
-                all_sp.Children.Remove(stackPanel);
-                all_sp.Children.Add(stackPanel);
-                CreateButtonsFromXML();
-                CreatButtonsFromFiles(ignoreFiles);
-            }
+            //Order(ignoreFiles);
 
             //CreatButtonsFromFiles(ignoreFiles);
             //CreateButtonsFromXML();
@@ -532,6 +525,72 @@ namespace TrayToolbar
 
             ChangeWindowTheme();
             //*/
+        }
+
+        private void Order(List<string> ignoreFiles)
+        {
+            XmlDocument xmlDoc2 = new XmlDocument();
+            xmlDoc2.Load(xmlFile);
+            XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
+
+            //if (itemNode1.Attributes != null)
+            if (itemNode1.Attributes["after"] != null)
+            {
+                if (itemNode1.Attributes["after"].Value.Equals("true"))
+                {
+                    //CreatButtonsFromFiles(ignoreFiles);
+                    //CreateButtonsFromXML();
+                    //all_sp.Children.Remove(sep);
+                    //all_sp.Children.Add(sep);
+                    //all_sp.Children.Remove(xml_sp);
+                    //all_sp.Children.Add(xml_sp);
+                    //CreatButtonsFromFiles(ignoreFiles);
+                    //CreateButtonsFromXML();
+                    SetXmlBelowFiles(ignoreFiles);
+                }
+                else
+                {
+                    ////CreateButtonsFromXML();
+                    ////CreatButtonsFromFiles(ignoreFiles);
+                    //all_sp.Children.Remove(sep);
+                    //all_sp.Children.Add(sep);
+                    //all_sp.Children.Remove(stackPanel);
+                    //all_sp.Children.Add(stackPanel);
+                    //CreateButtonsFromXML();
+                    //CreatButtonsFromFiles(ignoreFiles);
+                    SetXmlAboveFiles(ignoreFiles);
+                }
+            }
+            else
+            {
+                //all_sp.Children.Remove(sep);
+                //all_sp.Children.Add(sep);
+                //all_sp.Children.Remove(stackPanel);
+                //all_sp.Children.Add(stackPanel);
+                //CreateButtonsFromXML();
+                //CreatButtonsFromFiles(ignoreFiles);
+                SetXmlAboveFiles(ignoreFiles);
+            }
+        }
+
+        void SetXmlBelowFiles(List<string> ignoreFiles)
+        {
+            all_sp.Children.Remove(sep);
+            all_sp.Children.Add(sep);
+            all_sp.Children.Remove(xml_sp);
+            all_sp.Children.Add(xml_sp);
+            CreatButtonsFromFiles(ignoreFiles);
+            CreateButtonsFromXML();
+        }
+
+        void SetXmlAboveFiles(List<string> ignoreFiles)
+        {
+            all_sp.Children.Remove(sep);
+            all_sp.Children.Add(sep);
+            all_sp.Children.Remove(stackPanel);
+            all_sp.Children.Add(stackPanel);
+            CreateButtonsFromXML();
+            CreatButtonsFromFiles(ignoreFiles);
         }
 
         private void CreateButtonsFromXML()
