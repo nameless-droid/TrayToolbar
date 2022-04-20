@@ -63,8 +63,8 @@ namespace TrayToolbar
 
         public string GetValueOfSetting(string name)
         {
-            if (cashedFile != null)
-                Load(cashedFile);
+            //if (cashedFile != null)
+            //    Load(cashedFile);
 
             if (settings != null && settings.Find(s => s.Name.Equals(name)) != null)
                 return settings.Find(s => s.Name.Equals(name)).Value;

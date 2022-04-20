@@ -24,7 +24,8 @@ namespace TrayToolbar
         bool fromXML;
         public bool FromXML
         {
-            get {
+            get
+            {
                 return fromXML;
             }
             set { fromXML = value; }
@@ -72,10 +73,11 @@ namespace TrayToolbar
         public bool LightMode
         {
             get { return lightMode; }
-            set {
+            set
+            {
                 lightMode = value;
                 UpdateLightDarkMode();
-            } 
+            }
         }
 
 
@@ -107,6 +109,12 @@ namespace TrayToolbar
                 stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkColorString));
                 lbl.Foreground = Brushes.White;
             }
+        }
+
+        public void UpdateColors(SolidColorBrush main, SolidColorBrush second)
+        {
+            stackpanel.Background = main;
+            lbl.Foreground = second;
         }
 
         private void UserControl1_MouseEnter(object sender, MouseEventArgs e)
@@ -245,7 +253,7 @@ namespace TrayToolbar
 
             //try
             //{
-                icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+            icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
             //}
             //catch (Exception)
             //{

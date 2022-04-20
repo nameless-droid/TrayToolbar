@@ -38,9 +38,53 @@ namespace TrayToolbar
         string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xmlf";
         string dir = @"E:\Users\Anwender\Desktop\⠀\";
 
+        public enum WindowThemes
+        {
+            system,
+            app,
+            light,
+            dark
+        }
+
+        //WindowThemes theme = WindowThemes.dark;
+        WindowThemes theme;
+        public WindowThemes Theme
+        {
+            get
+            {
+                if (theme == WindowThemes.dark || theme == WindowThemes.light)
+                    return theme;
+
+
+                bool light = false;
+
+                if (theme == WindowThemes.system)
+                {
+                    RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", false);
+                    light = rk.GetValue("SystemUsesLightTheme").Equals(1);
+                }
+                else if (theme == WindowThemes.app)
+                {
+                    RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", false);
+                    light = rk.GetValue("AppsUseLightTheme").Equals(1);
+                }
+
+                if (light)
+                    return WindowThemes.light;
+                else
+                    return WindowThemes.dark;
+                //else if (theme == WindowThemes.app)
+            }
+            set
+            {
+                theme = value;
+            }
+        }
 
         public void LoadSettingsAndCreateButtons()
         {
+            //WindowTheme = WindowTheme.
+
             LoadSettings();
             CreateButtons();
 
@@ -61,6 +105,15 @@ namespace TrayToolbar
             }
 
             Order(ignoreFiles);
+
+            //ChangeWindowTheme();
+            SolidColorBrush white = new SolidColorBrush(Colors.White);
+            SolidColorBrush black = new SolidColorBrush(Colors.Black);
+
+            if (Theme == WindowThemes.light)
+                ChangeWindowColors(white, black, true);
+            else if (Theme == WindowThemes.dark)
+                ChangeWindowColors(black, white, false);
         }
 
         private void LoadSettings()
@@ -88,6 +141,14 @@ namespace TrayToolbar
 
             // Settings File
             dir = instance.GetValueOfSetting("path") ?? dir;
+
+            //Theme = instance.GetValueOfSetting("theme") ?? WindowThemes.system;
+            bool b = Enum.TryParse<WindowThemes>(instance.GetValueOfSetting("theme"), true, out WindowThemes result);
+            Theme = result;
+            //if (!result)
+            //{
+            //    ;
+            //}
         }
 
         public MainWindow()
@@ -110,7 +171,7 @@ namespace TrayToolbar
             }
             */
             //var t = XmlSettings.Instance;
-            
+
             /*
             XmlSettings instance = XmlSettings.Instance;
             instance.Load("settings.xml");
@@ -326,11 +387,67 @@ namespace TrayToolbar
             ChangeWindowTheme();
         }
 
-        private void ChangeWindowTheme()
+        void ChangeWindowColors(SolidColorBrush main, SolidColorBrush second, bool light)
+        {
+            /*
+            ActionIconButton btn = null;
+            for (int i = 0; i < actionIconButtonsList.Count; i++)
+            {
+                //actionIconButtonsList[i].UpdateColors(main, second);
+                if (light)
+                {
+                    actionIconButtonsList[i].LightMode = light;
+                }
+                if (i == 0)
+                    btn = actionIconButtonsList[i];
+            }
+
+            //mainBorder.Background = all_sp.Background = this.Background = main;
+
+            if (light)
+                mainBorder.Background = all_sp.Background = this.Background =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(btn.lightColorString));
+            else
+                mainBorder.Background = all_sp.Background = this.Background =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString(btn.darkColorString));
+            */
+        }
+
+        void ChangeWindowTheme()
+        {
+            SolidColorBrush brush = new SolidColorBrush(Colors.White);
+            //mainBorder.Background =
+            //all_sp.Background = brush;
+
+            //ActionIconButton firstItem = new ActionIconButton("--", true);
+            ActionIconButton firstItem = null;
+
+            for (int i = 0; i < actionIconButtonsList.Count; i++)
+            {
+                actionIconButtonsList[i].LightMode = true;
+                if (i == 0)
+                    firstItem = actionIconButtonsList[i];
+            }
+
+            mainBorder.Background = brush;
+
+            foreach (Button item in sp_WindowBar.Children)
+            {
+                item.Foreground = Brushes.Black;
+                //item.Style = (Style)Resources["btnBlue"];
+                object resource = Application.Current.FindResource("TransparentStyle");
+                if (resource != null && resource.GetType() == typeof(Style))
+                    item.Style = (Style)resource;
+            }
+        }
+
+        private void ChangeWindowThemeOld()
         {
             RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", false);
-            bool d = rk.GetValue("SystemUsesLightTheme").Equals(1);
-            if (rk.GetValue("SystemUsesLightTheme").Equals(1))
+            //bool d = rk.GetValue("SystemUsesLightTheme").Equals(1);
+            bool d = true;
+            //if (rk.GetValue("SystemUsesLightTheme").Equals(1))
+            if (d)
             {
                 ActionIconButton firstItem = new ActionIconButton("--", true);
                 //foreach (var item in actionIconButtonsList)
@@ -359,9 +476,29 @@ namespace TrayToolbar
 
                     //item.FocusVisualStyle = (Style)nul;
                 }
+
+
+                //foreach (var item in all_sp.Children)
+                //{
+                //    if (item is StackPanel)
+                //    {
+                //        StackPanel stackPanel = (StackPanel)item;
+                //        stackPanel.Background = Brushes.Black;
+                //    }
+                //}
+
             }
             else
             {
+                //foreach (var item in all_sp.Children)
+                //{
+                //    if (item is StackPanel)
+                //    {
+                //        StackPanel stackPanel = (StackPanel)item;
+                //        stackPanel.Background = Brushes.White;
+                //    }
+                //}
+
                 ActionIconButton firstItem = new ActionIconButton("--", false);
                 for (int i = 0; i < actionIconButtonsList.Count; i++)
                 {
@@ -413,7 +550,7 @@ namespace TrayToolbar
             this.Visibility = Visibility.Visible;
             this.Topmost = true;
             this.Topmost = false;
-            
+
             this.Activate();
         }
         #region dll imports
@@ -564,9 +701,9 @@ namespace TrayToolbar
             //string? xmlBelowFilesValue = instance.GetValueOfSetting("xmlBelowFiles");
             //if(xmlBelowFilesValue != null)
             //    xmlBelowFiles = bool.Parse(xmlBelowFilesValue);
-            
+
             string? xmlBelowFilesValue = instance.GetValueOfSetting("xmlBelowFiles");
-            if(xmlBelowFilesValue != null)
+            if (xmlBelowFilesValue != null)
             {
                 //xmlBelowFiles = bool.TryParse(xmlBelowFilesValue, out bool result) && result == true;
                 try
@@ -835,7 +972,7 @@ namespace TrayToolbar
                     }
 
                     if (File.Exists(filePath))
-                    CreateButtonAndAddToStackPanel(filePath, fileName);
+                        CreateButtonAndAddToStackPanel(filePath, fileName);
                 }
             }
             else
@@ -856,7 +993,9 @@ namespace TrayToolbar
 
         private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false, bool xml = false)
         {
-            ActionIconButton actionIconButton = new(text, false);
+            //ActionIconButton actionIconButton = new(text, false);
+
+            ActionIconButton actionIconButton = new(text, Theme == WindowThemes.light ? true : false);
             //actionIconButton.Height = itemHeight;
             actionIconButton.SetHeight(itemHeight);
 
@@ -885,7 +1024,7 @@ namespace TrayToolbar
             actionIconButton.Click += ActionIconButton_Click;
 
 
-            if(xml)
+            if (xml)
                 xml_sp.Children.Add(actionIconButton);
             else
                 stackPanel.Children.Add(actionIconButton);
@@ -997,7 +1136,7 @@ namespace TrayToolbar
                 }
             }
 
-            
+
 
             //string myString = processesAndBtns[1][myTime] // Day 1 at that specific time.
 
@@ -1094,7 +1233,7 @@ namespace TrayToolbar
             }
         }
 
-        
+
         private void stackPanel_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             try
