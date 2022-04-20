@@ -43,6 +43,24 @@ namespace TrayToolbar
         {
             LoadSettings();
             CreateButtons();
+
+            List<string> ignoreFiles = new List<string>();
+            /////////
+            XmlDocument xmlDoc1 = new XmlDocument();
+            //xmlDoc1.Load("test.xml");
+            xmlDoc1.Load(xmlFile);
+            XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore/text");
+
+            foreach (XmlNode textNode in itemNodes1)
+            {
+                //XmlNode textNode = itemNode.SelectSingleNode("text");
+                if ((textNode != null))
+                {
+                    ignoreFiles.Add(textNode.InnerText);
+                }
+            }
+
+            Order(ignoreFiles);
         }
 
         private void LoadSettings()
@@ -68,38 +86,8 @@ namespace TrayToolbar
             }
             //
 
-
-
-            List<string> ignoreFiles = new List<string>();
-            /////////
-            XmlDocument xmlDoc1 = new XmlDocument();
-            //xmlDoc1.Load("test.xml");
-            xmlDoc1.Load(xmlFile);
-            XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
-
-            foreach (XmlNode itemNode in itemNodes1)
-            {
-                XmlNode textNode = itemNode.SelectSingleNode("text");
-                if ((textNode != null))
-                {
-                    ignoreFiles.Add(textNode.InnerText);
-                }
-            }
-            Order(ignoreFiles);
-
-
             // Settings File
             dir = instance.GetValueOfSetting("path") ?? dir;
-
-            var xmlAboveFiles = instance.GetValueOfSetting("xmlAboveFiles");
-            if (xmlAboveFiles != null)
-            {
-                if (xmlAboveFiles == "true")
-                    SetXmlBelowFiles(ignoreFiles);
-                else if(xmlAboveFiles == "false")
-                    SetXmlBelowFiles(ignoreFiles);
-            }
-
         }
 
         public MainWindow()
@@ -122,6 +110,8 @@ namespace TrayToolbar
             }
             */
             //var t = XmlSettings.Instance;
+            
+            /*
             XmlSettings instance = XmlSettings.Instance;
             instance.Load("settings.xml");
             var test = XmlSettings.Instance.settings.Find(s => s.Name.Equals("test")).Value;
@@ -131,7 +121,7 @@ namespace TrayToolbar
             //dir = instance.settings.Find(s => s.Name.Equals("path")).Value;
 
             dir = instance.GetValueOfSetting("path") ?? dir;
-
+            */
             //return;
 
             /*
@@ -484,23 +474,6 @@ namespace TrayToolbar
 
             //moved to LoadSettings();
 
-            List<string> ignoreFiles = new List<string>();
-            /////////
-            XmlDocument xmlDoc1 = new XmlDocument();
-            //xmlDoc1.Load("test.xml");
-            xmlDoc1.Load(xmlFile);
-            XmlNodeList? itemNodes1 = xmlDoc1.SelectNodes("//buttons/ignore");
-
-            foreach (XmlNode itemNode in itemNodes1)
-            {
-                XmlNode textNode = itemNode.SelectSingleNode("text");
-                if ((textNode != null))
-                {
-                    ignoreFiles.Add(textNode.InnerText);
-                }
-            }
-
-
 
 
             //CreatButtonsFromFiles(ignoreFiles);
@@ -529,6 +502,8 @@ namespace TrayToolbar
 
         private void Order(List<string> ignoreFiles)
         {
+            bool xmlBelowFiles = true;
+
             XmlDocument xmlDoc2 = new XmlDocument();
             xmlDoc2.Load(xmlFile);
             XmlNode? itemNode1 = xmlDoc2.SelectSingleNode("//buttons");
@@ -546,7 +521,10 @@ namespace TrayToolbar
                     //all_sp.Children.Add(xml_sp);
                     //CreatButtonsFromFiles(ignoreFiles);
                     //CreateButtonsFromXML();
-                    SetXmlBelowFiles(ignoreFiles);
+                    //SetXmlBelowFiles(ignoreFiles);
+
+                    //xmlBelowFiles = false;
+                    xmlBelowFiles = true;
                 }
                 else
                 {
@@ -558,7 +536,11 @@ namespace TrayToolbar
                     //all_sp.Children.Add(stackPanel);
                     //CreateButtonsFromXML();
                     //CreatButtonsFromFiles(ignoreFiles);
-                    SetXmlAboveFiles(ignoreFiles);
+                    //SetXmlAboveFiles(ignoreFiles);
+
+                    //xmlBelowFiles &= true;
+
+                    xmlBelowFiles = false;
                 }
             }
             else
@@ -569,8 +551,47 @@ namespace TrayToolbar
                 //all_sp.Children.Add(stackPanel);
                 //CreateButtonsFromXML();
                 //CreatButtonsFromFiles(ignoreFiles);
-                SetXmlAboveFiles(ignoreFiles);
+                //SetXmlAboveFiles(ignoreFiles);
+
+                //xmlBelowFiles |= true;
+                xmlBelowFiles = false;
             }
+
+            XmlSettings instance = XmlSettings.Instance;
+            instance.Load("settings.xml");
+            //xmlBelowFiles = bool.Parse(instance.GetValueOfSetting("xmlAboveFiles"));
+
+            //string? xmlBelowFilesValue = instance.GetValueOfSetting("xmlBelowFiles");
+            //if(xmlBelowFilesValue != null)
+            //    xmlBelowFiles = bool.Parse(xmlBelowFilesValue);
+            
+            string? xmlBelowFilesValue = instance.GetValueOfSetting("xmlBelowFiles");
+            if(xmlBelowFilesValue != null)
+            {
+                //xmlBelowFiles = bool.TryParse(xmlBelowFilesValue, out bool result) && result == true;
+                try
+                {
+                    xmlBelowFiles = bool.Parse(xmlBelowFilesValue);
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+
+
+            //if (xmlAboveFiles != null)
+            //{
+            //    if (xmlAboveFiles == "true")
+            //        SetXmlBelowFiles(ignoreFiles);
+            //    else if (xmlAboveFiles == "false")
+            //        SetXmlBelowFiles(ignoreFiles);
+            //}
+
+            if (xmlBelowFiles)
+                SetXmlBelowFiles(ignoreFiles);
+            else
+                SetXmlAboveFiles(ignoreFiles);
         }
 
         void SetXmlBelowFiles(List<string> ignoreFiles)
@@ -807,6 +828,11 @@ namespace TrayToolbar
                         continue;
 
                     string filePath = Path.Combine(dir, fileName);
+
+                    if (filePath.Contains("desktop.files.json"))
+                    {
+                        ;
+                    }
 
                     if (File.Exists(filePath))
                     CreateButtonAndAddToStackPanel(filePath, fileName);
