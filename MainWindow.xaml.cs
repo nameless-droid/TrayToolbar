@@ -38,6 +38,9 @@ namespace TrayToolbar
         string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xmlf";
         string dir = @"E:\Users\Anwender\Desktop\⠀\";
 
+        //SolidColorBrush mainColor; //background
+        //SolidColorBrush secondColor; //foreground
+
         public enum WindowThemes
         {
             system,
@@ -83,7 +86,10 @@ namespace TrayToolbar
 
         public void LoadSettingsAndCreateButtons()
         {
+
+
             //WindowTheme = WindowTheme.
+
 
             LoadSettings();
             CreateButtons();
@@ -104,16 +110,42 @@ namespace TrayToolbar
                 }
             }
 
-            Order(ignoreFiles);
-
-            //ChangeWindowTheme();
             SolidColorBrush white = new SolidColorBrush(Colors.White);
             SolidColorBrush black = new SolidColorBrush(Colors.Black);
 
             if (Theme == WindowThemes.light)
+            {
                 ChangeWindowColors(white, black, true);
+                //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+            }
+
             else if (Theme == WindowThemes.dark)
+            {
                 ChangeWindowColors(black, white, false);
+
+                //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+            }
+
+            Order(ignoreFiles);
+
+            //ChangeWindowTheme();
+
+
+            if (Theme == WindowThemes.light)
+            {
+                ChangeWindowColors(white, black, true);
+                mainBorder.Background = all_sp.Background = this.Background =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+            }
+
+            else if (Theme == WindowThemes.dark)
+            {
+                ChangeWindowColors(black, white, false);
+
+                mainBorder.Background = all_sp.Background = this.Background =
+                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+            }
+
         }
 
         private void LoadSettings()
@@ -389,7 +421,7 @@ namespace TrayToolbar
 
         void ChangeWindowColors(SolidColorBrush main, SolidColorBrush second, bool light)
         {
-            /*
+
             ActionIconButton btn = null;
             for (int i = 0; i < actionIconButtonsList.Count; i++)
             {
@@ -401,7 +433,7 @@ namespace TrayToolbar
                 if (i == 0)
                     btn = actionIconButtonsList[i];
             }
-
+            /*
             //mainBorder.Background = all_sp.Background = this.Background = main;
 
             if (light)

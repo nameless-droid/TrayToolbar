@@ -68,7 +68,7 @@ namespace TrayToolbar
         public string Command { get; set; }
         //public bool LightMode { get; set; }
 
-        private bool lightMode;
+        private static bool lightMode;
 
         public bool LightMode
         {
