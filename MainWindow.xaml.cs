@@ -20,6 +20,9 @@ using System.Windows.Shapes;
 using System.Xml;
 using Path = System.IO.Path;
 
+using MColor = System.Windows.Media.Color;
+using DColor = System.Drawing.Color;
+
 namespace TrayToolbar
 {
     /// <summary>
@@ -92,6 +95,7 @@ namespace TrayToolbar
 
 
             LoadSettings();
+
             CreateButtons();
 
             List<string> ignoreFiles = new List<string>();
@@ -110,20 +114,42 @@ namespace TrayToolbar
                 }
             }
 
-            SolidColorBrush white = new SolidColorBrush(Colors.White);
-            SolidColorBrush black = new SolidColorBrush(Colors.Black);
+
+            //Color c1 = ((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+            //System.Drawing.Color c2 = System.Drawing.Color.FromArgb(c1.A, (int)(c1.R * 0.8), (int)(c1.G * 0.8), (int)(c1.B * 0.8));
+
+
+            //string light = XmlSettings.Instance.GetValueOfSetting("lightColor") ?? "#EEEEEE";
+            //string dark = XmlSettings.Instance.GetValueOfSetting("darkColor") ?? "#2B2B2B";
+
+
+            string lightBg = XmlSettings.Instance.GetValueOfSetting("lightBg") ?? "#EEEEEE";
+            string lightFg = XmlSettings.Instance.GetValueOfSetting("lightFg") ?? "#000000";
+            string darkBg = XmlSettings.Instance.GetValueOfSetting("darkBg") ?? "#2B2B2B";
+            string darkFg = XmlSettings.Instance.GetValueOfSetting("darkFg") ?? "#FFFFFF";
+
+            //SolidColorBrush white = new SolidColorBrush(((Color)ColorConverter.ConvertFromString("#EEEEEE")));
+            //SolidColorBrush black = new SolidColorBrush(((Color)ColorConverter.ConvertFromString("#EEEEEE")));
+
+            //SolidColorBrush white = new SolidColorBrush(Colors.White);
+            //SolidColorBrush black = new SolidColorBrush(Colors.Black);
 
             if (Theme == WindowThemes.light)
             {
-                ChangeWindowColors(white, black, true);
+                //ChangeWindowColors(white, black, true);
                 //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
-            }
+                mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightBg));
 
+                //mainBorder.Background = all_sp.Background = new SolidColorBrush(Colors.Black);
+                ChangeForegroundOfWindowBarButtons(lightFg);
+            }
             else if (Theme == WindowThemes.dark)
             {
-                ChangeWindowColors(black, white, false);
-
+                //ChangeWindowColors(black, white, false);
                 //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+                mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkBg));
+
+                ChangeForegroundOfWindowBarButtons(darkFg);
             }
 
             Order(ignoreFiles);
@@ -133,19 +159,43 @@ namespace TrayToolbar
 
             if (Theme == WindowThemes.light)
             {
-                ChangeWindowColors(white, black, true);
-                mainBorder.Background = all_sp.Background = this.Background =
-                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+                ChangeWindowColors(lightBg, lightFg, true);
+                //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
             }
 
             else if (Theme == WindowThemes.dark)
             {
-                ChangeWindowColors(black, white, false);
-
-                mainBorder.Background = all_sp.Background = this.Background =
-                    new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+                ChangeWindowColors(darkBg, darkFg, false);
+                //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
             }
 
+
+        }
+
+        private void ChangeForegroundOfWindowBarButtons(string color)
+        {
+            foreach (Button btn in sp_WindowBar.Children)
+            {
+                //btn.Tag = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+                //btn.Tag = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
+                btn.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+            }
+        }
+
+        private MColor MakeColorLighter(MColor mColor, double val)
+        {
+            //DColor lighterColor = System.Drawing.Color.FromArgb(mColor.A, (int)(mColor.R * val), (int)(mColor.G * val), (int)(mColor.B * val));
+            //        DColor lighterColor = System.Drawing.Color.FromArgb(mColor.A,
+            //Math.Clamp((int)(mColor.R * val), 0, 255),
+            //Math.Clamp((int)(mColor.G * val), 0, 255),
+            //Math.Clamp((int)(mColor.B * val), 0, 255));
+            DColor lighterColor = System.Drawing.Color.FromArgb(mColor.A, (int)(mColor.R * val).Clamp(0, 255), (int)(mColor.G * val).Clamp(0, 255), (int)(mColor.B * val).Clamp(0, 255));
+            return System.Windows.Media.Color.FromArgb(lighterColor.A, lighterColor.R, lighterColor.G, lighterColor.B);
+        }
+
+        public System.Windows.Media.Color ToMediaColor(System.Drawing.Color color)
+        {
+            return System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
 
         private void LoadSettings()
@@ -181,6 +231,8 @@ namespace TrayToolbar
             //{
             //    ;
             //}
+
+
         }
 
         public MainWindow()
@@ -419,19 +471,53 @@ namespace TrayToolbar
             ChangeWindowTheme();
         }
 
-        void ChangeWindowColors(SolidColorBrush main, SolidColorBrush second, bool light)
+        //void ChangeWindowColors(SolidColorBrush main, SolidColorBrush second, bool light)
+        void ChangeWindowColors(string bg, string fg, bool light)
         {
+
+
+
+            //MColor lightCol = ((Color)ColorConverter.ConvertFromString(light));
+            //MColor darkCol = ((Color)ColorConverter.ConvertFromString(dark));
+            ////DColor lightColor = System.Drawing.Color.FromArgb(lightCol.A, (int)(lightCol.R * 0.8), (int)(lightCol.G * 0.8), (int)(lightCol.B * 0.8));
+            ////DColor lightColor = System.Drawing.Color.FromArgb(lightCol.A, lightCol.R, lightCol.G, lightCol.B);
+
+            ////MakeColorLighter(lightCol, 1.25);
+
+            ////light = lightColor.
+
+            //SolidColorBrush lightHover = new SolidColorBrush(MakeColorLighter(lightCol, 1.25));
+            ////SolidColorBrush white = new SolidColorBrush(ToMediaColor(lightColor));
+            //SolidColorBrush darkHover = new SolidColorBrush(MakeColorLighter(darkCol, 1.25));
+
+
+            MColor mColor = ((Color)ColorConverter.ConvertFromString(bg));
+            SolidColorBrush hover = new SolidColorBrush(MakeColorLighter(mColor, 1.25));
+
+            SolidColorBrush bgColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(bg));
+            SolidColorBrush fgColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(fg));
 
             ActionIconButton btn = null;
             for (int i = 0; i < actionIconButtonsList.Count; i++)
             {
-                //actionIconButtonsList[i].UpdateColors(main, second);
-                if (light)
-                {
-                    actionIconButtonsList[i].LightMode = light;
-                }
-                if (i == 0)
-                    btn = actionIconButtonsList[i];
+                //actionIconButtonsList[i].UpdateColors
+                //    (
+                //    (
+                //    (Color)ColorConverter.ConvertFromString(bg),
+                //    (
+                //    (Color)ColorConverter.ConvertFromString(fg)
+                //    );
+
+                actionIconButtonsList[i].LightMode = light;
+
+                actionIconButtonsList[i].UpdateColors(bgColor, fgColor);
+                actionIconButtonsList[i].UpdateHoverColor(hover);
+                //if (light)
+                //{
+                //    actionIconButtonsList[i].LightMode = light;
+                //}
+                //if (i == 0)
+                //    btn = actionIconButtonsList[i];
             }
             /*
             //mainBorder.Background = all_sp.Background = this.Background = main;
@@ -463,6 +549,7 @@ namespace TrayToolbar
 
             mainBorder.Background = brush;
 
+            /*
             foreach (Button item in sp_WindowBar.Children)
             {
                 item.Foreground = Brushes.Black;
@@ -470,7 +557,7 @@ namespace TrayToolbar
                 object resource = Application.Current.FindResource("TransparentStyle");
                 if (resource != null && resource.GetType() == typeof(Style))
                     item.Style = (Style)resource;
-            }
+            }*/
         }
 
         private void ChangeWindowThemeOld()
@@ -496,6 +583,7 @@ namespace TrayToolbar
                 //this.Background = firstItem.stackpanel.Background;
                 mainBorder.Background = firstItem.stackpanel.Background;
 
+
                 foreach (Button item in sp_WindowBar.Children)
                 {
                     item.Foreground = Brushes.Black;
@@ -508,6 +596,7 @@ namespace TrayToolbar
 
                     //item.FocusVisualStyle = (Style)nul;
                 }
+
 
 
                 //foreach (var item in all_sp.Children)
@@ -1068,7 +1157,8 @@ namespace TrayToolbar
             ////this.Background = actionIconButton.stackpanel.Background;
 
             this.Height = 18 + (itemHeight * stackPanel.Children.Count + 4) + (itemHeight * xml_sp.Children.Count + 4);
-            this.Width = 250;
+            //this.Width = 250;
+            this.Width = 255;
 
             actionIconButtonsList.Add(actionIconButton);
 
@@ -1414,5 +1504,32 @@ namespace TrayToolbar
         {
             stackPanel_PreviewMouseLeftButtonUp(null, null);
         }
+
+        private void Button_IsMouseDirectlyOverChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            Debug.WriteLine(sender + "dd");
+        }
+
+        private void Button_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Button btn = sender as Button;
+            btn.Background = btn.Tag as SolidColorBrush;
+            //btn.Background = new SolidColorBrush(Colors.Red);
+            //btn.Style.Setters.Add()
+            //= new SolidColorBrush(Colors.Red);
+        }
+
+        private void Button_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Button btn = sender as Button;
+            btn.Background = null;
+        }
     }
+
+    //class ColorInfo
+    //{
+    //    public SolidColorBrush hoverColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+    //    public SolidColorBrush normal = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+
+    //}
 }

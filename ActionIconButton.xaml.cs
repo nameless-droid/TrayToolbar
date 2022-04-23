@@ -21,6 +21,15 @@ namespace TrayToolbar
     /// </summary>
     public partial class ActionIconButton : UserControl
     {
+        SolidColorBrush lightHoverColor;
+        SolidColorBrush darkHoverColor;
+
+        //string hoverColor;
+
+        SolidColorBrush hoverBrush;
+        SolidColorBrush brush;
+
+
         bool fromXML;
         public bool FromXML
         {
@@ -100,6 +109,7 @@ namespace TrayToolbar
             if (lightMode == true)
             {
                 //lbl.Foreground = Brushes.Black;
+                //stackpanel.Background = lightColor = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
                 stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
                 lbl.Foreground = Brushes.Black;
             }
@@ -111,10 +121,27 @@ namespace TrayToolbar
             }
         }
 
-        public void UpdateColors(SolidColorBrush main, SolidColorBrush second)
+        //public void UpdateColors(SolidColorBrush bg, SolidColorBrush fg, string lightHover, string darkHover)
+        public void UpdateColors(SolidColorBrush bg, SolidColorBrush fg)
         {
-            stackpanel.Background = main;
-            lbl.Foreground = second;
+            stackpanel.Background = bg;
+            lightColorString = stackpanel.Background.ToString();
+            darkColorString = stackpanel.Background.ToString();
+            lbl.Foreground = fg;
+            //lightHoverColorString = lightHover;
+            //darkHoverColorString = darkHover;
+        }
+
+        public void UpdateHoverColor(SolidColorBrush color)
+        {
+            if (lightMode)
+            {
+                lightHoverColor = color;
+            }
+            else
+            {
+                darkHoverColor = color;
+            }
         }
 
         private void UserControl1_MouseEnter(object sender, MouseEventArgs e)
@@ -135,18 +162,29 @@ namespace TrayToolbar
 
         private void MouseOver()
         {
-            if (LightMode == true)
+            //if (string.IsNullOrEmpty(hoverColor))
+            if (hoverBrush == null)
             {
-                //#EEEEEE
-                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightHoverColorString));
+                if (LightMode == true)
+                {
+                    //#EEEEEE
+                    //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
+                    stackpanel.Background = lightHoverColor ?? new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightHoverColorString));
+                }
+                else
+                {
+                    //#2B2B2B
+                    //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#414141"));
+                    stackpanel.Background = darkHoverColor ?? new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkHoverColorString));
+                }
             }
             else
             {
-                //#2B2B2B
-                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#414141"));
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkHoverColorString));
+                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hoverColor));
+                stackpanel.Background = hoverBrush;
             }
+
+
         }
 
         private void UserControl1_MouseLeave(object sender, MouseEventArgs e)
@@ -162,18 +200,28 @@ namespace TrayToolbar
 
         private void MouseNotOver()
         {
-            if (LightMode == true)
+            if (hoverBrush == null)
             {
-                //#FFFFFF
-                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
+                if (LightMode == true)
+                {
+                    //#FFFFFF
+                    //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
+                    //stackpanel.Background = lightColor ?? new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
+                    stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightColorString));
+                }
+                else
+                {
+                    //#414141
+                    //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
+                    stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkColorString));
+                }
             }
             else
             {
-                //#414141
-                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
-                stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkColorString));
+                //stackpanel.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hoverColor));
+                stackpanel.Background = brush;
             }
+
         }
 
         private const int MinLightness = 1;

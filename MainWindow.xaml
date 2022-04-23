@@ -34,22 +34,37 @@
         </Style>-->
     </Window.Resources>
     <Border ClipToBounds="True" x:Name="mainBorder" CornerRadius="7" BorderThickness="0.4" BorderBrush="{Binding ElementName=mainBorder, Path=Background}" Background="Black">
+        <Border.OpacityMask>
+            <VisualBrush>
+                <VisualBrush.Visual>
+                    <Border 
+                    Background="Black"
+                    SnapsToDevicePixels="True"
+                    CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=Border}}"
+                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}"
+                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}"
+                    />
+                </VisualBrush.Visual>
+            </VisualBrush>
+        </Border.OpacityMask>
         <Grid ClipToBounds="True" Margin="0" Background="Transparent">
             <Border CornerRadius="7" ClipToBounds="True" Height="19" Background="Transparent" VerticalAlignment="Top" BorderBrush="Transparent" BorderThickness="0">
-                <StackPanel ClipToBounds="True" x:Name="sp_WindowBar" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
+                <StackPanel ClipToBounds="True" Clip="{Binding ElementName=mainBorder}" x:Name="sp_WindowBar" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
                     <!--<Button Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right"></Button>-->
-                    <Button FocusVisualStyle="{x:Null}" Click="Minimize_Click" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE738;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
-                    <Button FocusVisualStyle="{x:Null}" Click="Settings_Click" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
+                    <!--<Button Style="{StaticResource TransparentStyle2}" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave"  IsHitTestVisible="True" IsMouseDirectlyOverChanged="Button_IsMouseDirectlyOverChanged" FocusVisualStyle="{x:Null}" Click="Minimize_Click" FontSize="6" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE738;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>-->
+                    <!--<Button Style="{StaticResource TransparentStyle}" Width="30" Padding="5" Margin="0" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave"  IsHitTestVisible="True" IsMouseDirectlyOverChanged="Button_IsMouseDirectlyOverChanged" FocusVisualStyle="{x:Null}" Click="Minimize_Click" FontSize="6" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE738;" FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>-->
+                    <Button HorizontalContentAlignment="Center" Style="{StaticResource TransparentStyle}" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave" FocusVisualStyle="{x:Null}" Click="Minimize_Click" FontSize="15" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content=" &#xE738; " FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
+                    <Button HorizontalContentAlignment="Center" Style="{StaticResource TransparentStyle}" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave" FocusVisualStyle="{x:Null}" Click="Settings_Click" FontSize="15" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content=" &#xE713; " FontFamily="Segoe MDL2 Assets" HorizontalAlignment="Right"></Button>
                     <!--<Button Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>-->
-                    <Button FocusVisualStyle="{x:Null}" ClipToBounds="True" FontSize="15" Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>
+                    <Button  HorizontalContentAlignment="Center" Style="{StaticResource TransparentStyle}" MouseEnter="Button_MouseEnter" MouseLeave="Button_MouseLeave" FocusVisualStyle="{x:Null}" ClipToBounds="True" FontSize="15" Margin="0" Click="Close_Click" WindowChrome.IsHitTestVisibleInChrome="True"  Content=" &#xE711; " FontFamily="Segoe MDL2 Assets" Background="Transparent" HorizontalAlignment="Right"></Button>
                 </StackPanel>
             </Border>
-            <StackPanel Background="Transparent" x:Name="all_sp" Orientation="Vertical" Margin="0,18,0,0">
+            <StackPanel ClipToBounds="True" Background="Transparent" x:Name="all_sp" Orientation="Vertical" Margin="0,18,0,0">
                 <StackPanel Background="Transparent" DragLeave="stackPanel_DragLeave" PreviewMouseLeftButtonDown="stackPanel_PreviewMouseLeftButtonDown" PreviewMouseLeftButtonUp="stackPanel_PreviewMouseLeftButtonUp"
                     PreviewMouseMove="stackPanel_PreviewMouseMove" DragEnter="stackPanel_DragEnter" Drop="stackPanel_Drop"
                     AllowDrop="True" x:Name="stackPanel" Margin="0,0,0,0"></StackPanel>
                 <Separator x:Name="sep"></Separator>
-                <StackPanel Background="Transparent" x:Name="xml_sp" Margin="0,0,0,0"></StackPanel>
+                <StackPanel ClipToBounds="True" Background="Transparent" x:Name="xml_sp" Margin="0,0,0,0"></StackPanel>
             </StackPanel>
             <tb:TaskbarIcon x:Name="myNotifyIcon"
                     Visibility="Visible" NoLeftClickDelay="True" LeftClickCommand="ApplicationCommands.New"/>

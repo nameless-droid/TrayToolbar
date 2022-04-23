@@ -93,8 +93,8 @@
             </Setter>
         </Style>-->
 
-        
-        
+
+
         <Style x:Key="TransparentStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Transparent"></Setter>
             <Setter Property="BorderBrush" Value="Transparent"></Setter>
@@ -127,7 +127,42 @@
             </Setter>
         </Style>
 
-
+        <Style x:Key="TransparentStyle2" TargetType="{x:Type Button}" x:Name="btn">
+            <Setter Property="Background" Value="Transparent"></Setter>
+            <Setter Property="BorderBrush" Value="Transparent"></Setter>
+            <!--<Setter Property="Padding" Value="0"></Setter>
+            <Setter Property="Margin" Value="20"></Setter>-->
+            <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+            <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+            <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+            <Setter Property="Padding" Value="0"></Setter>
+            <Setter Property="FontSize" Value="10"></Setter>
+            <Setter Property="Foreground" Value="Black"></Setter>
+            <Setter Property="Height" Value="20"/>
+            <Setter Property="Width" Value="20"/>
+            <!--<Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border>
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter  Property="Padding" Value="2"></Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{Binding ElementName=btn, Path=Tag}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid Background="Transparent">
+                                <ContentPresenter></ContentPresenter>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>-->
+        </Style>
 
     </Application.Resources>
 </Application>
