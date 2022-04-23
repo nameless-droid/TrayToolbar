@@ -46,10 +46,12 @@ namespace TrayToolbar
 
         public enum WindowThemes
         {
+            none,
             system,
             app,
             light,
-            dark
+            dark,
+            l, d
         }
 
         //WindowThemes theme = WindowThemes.dark;
@@ -61,6 +63,11 @@ namespace TrayToolbar
                 if (theme == WindowThemes.dark || theme == WindowThemes.light)
                     return theme;
 
+                if (theme == WindowThemes.l)
+                    theme = WindowThemes.light;
+
+                if (theme == WindowThemes.d)
+                    theme = WindowThemes.dark;
 
                 bool light = false;
 
@@ -141,7 +148,7 @@ namespace TrayToolbar
                 mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(lightBg));
 
                 //mainBorder.Background = all_sp.Background = new SolidColorBrush(Colors.Black);
-                ChangeForegroundOfWindowBarButtons(lightFg);
+                ChangeForegroundOfWindowBarButtons(lightFg, ChangeLightnessOfColor(lightBg, 1.25));
             }
             else if (Theme == WindowThemes.dark)
             {
@@ -149,7 +156,7 @@ namespace TrayToolbar
                 //mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2B2B2B"));
                 mainBorder.Background = all_sp.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(darkBg));
 
-                ChangeForegroundOfWindowBarButtons(darkFg);
+                ChangeForegroundOfWindowBarButtons(darkFg, ChangeLightnessOfColor(darkBg, 1.25));
             }
 
             Order(ignoreFiles);
@@ -172,13 +179,15 @@ namespace TrayToolbar
 
         }
 
-        private void ChangeForegroundOfWindowBarButtons(string color)
+        private void ChangeForegroundOfWindowBarButtons(string color, SolidColorBrush hover)
         {
             foreach (Button btn in sp_WindowBar.Children)
             {
                 //btn.Tag = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEEEEE"));
                 //btn.Tag = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFFFFF"));
                 btn.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+                //btn.Tag = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hover));
+                btn.Tag = hover;
             }
         }
 
@@ -191,6 +200,13 @@ namespace TrayToolbar
             //Math.Clamp((int)(mColor.B * val), 0, 255));
             DColor lighterColor = System.Drawing.Color.FromArgb(mColor.A, (int)(mColor.R * val).Clamp(0, 255), (int)(mColor.G * val).Clamp(0, 255), (int)(mColor.B * val).Clamp(0, 255));
             return System.Windows.Media.Color.FromArgb(lighterColor.A, lighterColor.R, lighterColor.G, lighterColor.B);
+        }
+
+        private SolidColorBrush ChangeLightnessOfColor(string col, double val)
+        {
+            MColor mColor = (Color)ColorConverter.ConvertFromString((string)col);
+            DColor lighterColor = System.Drawing.Color.FromArgb(mColor.A, (int)(mColor.R * val).Clamp(0, 255), (int)(mColor.G * val).Clamp(0, 255), (int)(mColor.B * val).Clamp(0, 255));
+            return new SolidColorBrush(System.Windows.Media.Color.FromArgb(lighterColor.A, lighterColor.R, lighterColor.G, lighterColor.B));
         }
 
         public System.Windows.Media.Color ToMediaColor(System.Drawing.Color color)
@@ -226,6 +242,12 @@ namespace TrayToolbar
 
             //Theme = instance.GetValueOfSetting("theme") ?? WindowThemes.system;
             bool b = Enum.TryParse<WindowThemes>(instance.GetValueOfSetting("theme"), true, out WindowThemes result);
+
+            //if (result == WindowThemes.none)
+            //{
+            //    b = Enum.TryParse<WindowThemes>(instance.GetValueOfSetting("theme"), true, out WindowThemes result1);
+            //}
+
             Theme = result;
             //if (!result)
             //{
@@ -1513,7 +1535,19 @@ namespace TrayToolbar
         private void Button_MouseEnter(object sender, MouseEventArgs e)
         {
             Button btn = sender as Button;
-            btn.Background = btn.Tag as SolidColorBrush;
+            //btn.Background = btn.Tag as SolidColorBrush;
+
+            if (Theme == WindowThemes.dark)
+            {
+                btn.Foreground = (XmlSettings.Instance.GetValueOfSetting("lightFg") ?? "#000000").ToBrush();
+
+
+            }
+            else
+            {
+                btn.Foreground = (XmlSettings.Instance.GetValueOfSetting("darkFg") ?? "#FFFFFF").ToBrush();
+            }
+
             //btn.Background = new SolidColorBrush(Colors.Red);
             //btn.Style.Setters.Add()
             //= new SolidColorBrush(Colors.Red);
@@ -1523,6 +1557,17 @@ namespace TrayToolbar
         {
             Button btn = sender as Button;
             btn.Background = null;
+
+            if (Theme == WindowThemes.light)
+            {
+                btn.Foreground = (XmlSettings.Instance.GetValueOfSetting("lightFg") ?? "#000000").ToBrush();
+
+
+            }
+            else
+            {
+                btn.Foreground = (XmlSettings.Instance.GetValueOfSetting("darkFg") ?? "#FFFFFF").ToBrush();
+            }
         }
     }
 
