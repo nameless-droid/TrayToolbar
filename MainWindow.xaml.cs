@@ -60,14 +60,14 @@ namespace TrayToolbar
         {
             get
             {
-                if (theme == WindowThemes.dark || theme == WindowThemes.light)
-                    return theme;
-
                 if (theme == WindowThemes.l)
-                    theme = WindowThemes.light;
+                    Theme = WindowThemes.light;
 
                 if (theme == WindowThemes.d)
-                    theme = WindowThemes.dark;
+                    Theme = WindowThemes.dark;
+
+                if (theme == WindowThemes.dark || theme == WindowThemes.light)
+                    return theme;
 
                 bool light = false;
 
