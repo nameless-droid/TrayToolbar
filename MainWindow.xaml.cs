@@ -30,6 +30,11 @@ namespace TrayToolbar
     /// </summary>
     public partial class MainWindow : Window
     {
+        public double dpiScaleX { get; set; } = 1;
+        public double dpiScaleY { get; set; } = 1;
+
+        public string settingsFilePath { get; set; } = "settings.xml";
+
         List<ActionIconButton> actionIconButtonsList;
 
         List<Process> activeProcesses;
@@ -257,9 +262,23 @@ namespace TrayToolbar
 
         }
 
+        public void ResetPosition()
+        {
+            Hardcodet.Wpf.TaskbarNotification.Interop.Point p = myNotifyIcon.GetPopupTrayPosition();
+            Left = p.X - Width - 5;
+            Top = p.Y - Height - 5;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+
+            Microsoft.Win32.SystemEvents.PowerModeChanged += (sender, args) =>
+            {
+                LoadSettingsAndCreateButtons();
+            };
+
+            DpiChanged += MainWindow_DpiChanged;
 
             /*
             List<Setting> settings = XmlSettings.Load("settings.xml");
@@ -306,7 +325,77 @@ namespace TrayToolbar
 
             //GetXmlFile(Path.Combine(Directory.GetCurrentDirectory(), "items.xml"), 0);
             //MessageBox.Show("1.", Directory.GetCurrentDirectory());
-            GetXmlFile(Directory.GetCurrentDirectory(), 0);
+            
+            //bool foundXmlFile = GetXmlFile(Directory.GetCurrentDirectory(), 0);
+            xmlFile = GetXmlFile(Directory.GetCurrentDirectory(), 0);
+            if (xmlFile == "")
+            {
+                using (StreamWriter sw = File.CreateText("items.xml"))
+                {
+                    //sw.WriteLine(@"<buttons after='false' path='.'>");
+                    //sw.Write(@"<button>\n        <text>Example Item (opens cmd)</text>\n        <icon>C:\WINDOWS\system32\cmd.exe</icon>\");
+                    sw.Write(@"<buttons after='false' path='.'>
+    <button>
+        <text>Example Item (opens cmd)</text>
+        <command>start cmd</command>
+        <!-- <command>cmd !SHOWWND</command> -->
+        <icon>C:\WINDOWS\system32\cmd.exe</icon>
+        <fileName>cmd</fileName>
+    </button>
+</buttons>");
+                    //sw.WriteLine(@"</buttons>");
+                }
+
+                xmlFile = "items.xml";
+            }
+            /*
+            Action<string, int> settingsFunc = (string s, int count) =>
+            {
+                if (File.Exists(Path.Combine(s, "items.xml")))
+                {
+                    xmlFile = Path.Combine(s, "items.xml");
+                    return true;
+                }
+                else
+                {
+                    var currentPath = Path.GetDirectoryName(s);
+
+                    if (currentPath == null)
+                    {
+                        return false;
+                    }
+
+
+                    foreach (var fileName in Directory.GetFiles(currentPath))
+                    {
+                        if (fileName.Equals("items.xml"))
+                        {
+                            xmlFile = s;
+                            return true;
+                        }
+
+                    }
+
+                    var i = s.LastIndexOf(@"\");
+                    s = s.Remove(i, s.Count() - i);
+
+                    GetXmlFile(s, ++count);
+
+                    return false;
+            };*/
+
+            settingsFilePath = GetXmlFile(Directory.GetCurrentDirectory(), 0, "settings.xml");
+            if (string.IsNullOrWhiteSpace(settingsFilePath))
+            {
+                using (StreamWriter sw = File.CreateText("settings.xml"))
+                {
+                    sw.Write("<settings></settings>");
+                }
+
+                settingsFilePath = "items.xml";
+            }
+            
+
 
             var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             //MessageBox.Show("2.");
@@ -333,7 +422,7 @@ namespace TrayToolbar
             activeProcesses = new List<Process>();
             btnToHideIfProcStarted = new List<ActionIconButton>();
 
-            ChangeWindowTheme();
+            //ChangeWindowTheme();
 
             string[] args = Environment.GetCommandLineArgs();
             //Debug.WriteLine(args[0]);
@@ -373,28 +462,43 @@ namespace TrayToolbar
             Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
         }
 
+        private void MainWindow_DpiChanged(object sender, DpiChangedEventArgs e)
+        {
+            //throw new NotImplementedException();
+            dpiScaleX = e.NewDpi.DpiScaleX;
+            dpiScaleY = e.NewDpi.DpiScaleY;
+        }
 
-        private void GetXmlFile(string s, int count)
+        private string GetXmlFile(string s, int count, string name = "items.xml")
         {
             //MessageBox.Show(s.ToString() + " --- " + count);
             //var file = "items.xml";
-            if (File.Exists(Path.Combine(s, "items.xml")))
+            if (File.Exists(Path.Combine(s, name)))
             {
                 //xmlFile = s;
                 xmlFile = Path.Combine(s, "items.xml");
+                return Path.Combine(s, "items.xml");
                 //MessageBox.Show(xmlFile, "found1");
                 //MessageBox.Show(s, "found2");
             }
             else
             {
                 //foreach (var item in Directory.GetFiles(Directory.GetCurrentDirectory()))
-                foreach (var fileName in Directory.GetFiles(Path.GetDirectoryName(s)))
+                var currentPath = Path.GetDirectoryName(s);
+                
+                if(currentPath == null)
                 {
-                    if (fileName.Equals("items.xml"))
+                    return "";
+                }
+
+
+                foreach (var fileName in Directory.GetFiles(currentPath))
+                {
+                    if (fileName.Equals(name))
                     //if (Path.GetFileName(fileName).Equals("items.xml"))
                     {
                         xmlFile = s;
-                        return;
+                        return s;
                     }
                     //count++;
                     //GetXmlFile(System.IO.Path.GetFileName(fileName), count);
@@ -420,6 +524,7 @@ namespace TrayToolbar
 
                     //throw;
                 }
+                return "";
             }
 
             if (count >= 4)
@@ -430,23 +535,7 @@ namespace TrayToolbar
                     sr.Write()
                 }*/
 
-                using (StreamWriter sw = File.CreateText("items.xml"))
-                {
-                    //sw.WriteLine(@"<buttons after='false' path='.'>");
-                    //sw.Write(@"<button>\n        <text>Example Item (opens cmd)</text>\n        <icon>C:\WINDOWS\system32\cmd.exe</icon>\");
-                    sw.Write(@"<buttons after='false' path='.'>
-    <button>
-        <text>Example Item (opens cmd)</text>
-        <command>start cmd</command>
-        <!-- <command>cmd !SHOWWND</command> -->
-        <icon>C:\WINDOWS\system32\cmd.exe</icon>
-        <fileName>cmd</fileName>
-    </button>
-</buttons>");
-                    //sw.WriteLine(@"</buttons>");
-                }
-
-                xmlFile = "items.xml";
+                return "";
             }
         }
 
@@ -490,7 +579,7 @@ namespace TrayToolbar
             //    Debug.WriteLine(SystemParameters.UxThemeName);
             //}
 
-            ChangeWindowTheme();
+            //ChangeWindowTheme();
         }
 
         //void ChangeWindowColors(SolidColorBrush main, SolidColorBrush second, bool light)
@@ -530,7 +619,8 @@ namespace TrayToolbar
                 //    (Color)ColorConverter.ConvertFromString(fg)
                 //    );
 
-                actionIconButtonsList[i].LightMode = light;
+                //actionIconButtonsList[i].LightMode = light;
+                //todo
 
                 actionIconButtonsList[i].UpdateColors(bgColor, fgColor);
                 actionIconButtonsList[i].UpdateHoverColor(hover);
@@ -672,22 +762,52 @@ namespace TrayToolbar
         {
             //MessageBox.Show("The New command was invoked");
             Hardcodet.Wpf.TaskbarNotification.Interop.Point p = myNotifyIcon.GetPopupTrayPosition();
-            //this.Left = p.X;
+            this.Show();
+            this.Visibility = Visibility.Visible;
+            this.Topmost = true;
+            this.Topmost = false;
+            this.Activate();
 
+
+            //Left = p.X-Width-5;
+            //Top = p.Y - Height - 5;
+            return;
+            //this.Left = p.X;
+            //x = 1606
+            //y = 1017
+
+            //x = 2560
+            //y = 1550
+            //Left = p.X * 1.5;
+            //Top = p.Y * 1.5;
+
+            //return;
+            //SetProcessDPIAware();
+            
             GetCursorPos(out var pt);
             //pt.X = 0;
-            double newX = pt.X - this.Width / 2;
-            if (newX + this.Width >= 1920)
+
+            double dpiWidth = Width * dpiScaleX;
+            double dpiHeight = Height * dpiScaleY;
+
+
+            //double newX = pt.X*dpiScaleX - dpiWidth / 2;
+            double newX = pt.X*dpiScaleX - (Width / 2) * dpiScaleX;
+            //newX *= dpiScaleX;
+            Left = newX;
+            //Left = 10;
+            /*
+            if (newX + dpiWidth >= 1920)
             {
-                this.Left = 1920 - this.Width;
+                this.Left = 1920 - dpiWidth;
             }
             else
             {
-                this.Left = pt.X - this.Width / 2;
-            }
+                this.Left = pt.X - dpiWidth / 2;
+            }*/
 
-            this.Top = p.Y - this.Height;
-
+            //this.Top = p.Y*dpiScaleY - dpiHeight;
+            this.Top = 0;
             this.Show();
 
             this.Visibility = Visibility.Visible;
@@ -731,6 +851,7 @@ namespace TrayToolbar
         {
             //CreateButtons();
             LoadSettingsAndCreateButtons();
+            ResetPosition();
         }
 
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -776,7 +897,7 @@ namespace TrayToolbar
 
 
 
-            ChangeWindowTheme();
+            //ChangeWindowTheme();
             //*/
         }
 
@@ -838,7 +959,8 @@ namespace TrayToolbar
             }
 
             XmlSettings instance = XmlSettings.Instance;
-            instance.Load("settings.xml");
+            //instance.Load("settings.xml");
+            instance.Load(settingsFilePath);
             //xmlBelowFiles = bool.Parse(instance.GetValueOfSetting("xmlAboveFiles"));
 
             //string? xmlBelowFilesValue = instance.GetValueOfSetting("xmlBelowFiles");
@@ -1182,6 +1304,8 @@ namespace TrayToolbar
             //this.Width = 250;
             this.Width = 255;
 
+            this.Top -= itemHeight;
+
             actionIconButtonsList.Add(actionIconButton);
 
 
@@ -1384,7 +1508,7 @@ namespace TrayToolbar
             {
                 _isDown = false;
                 _isDragging = false;
-                _realDragSource.ReleaseMouseCapture();
+                _realDragSource?.ReleaseMouseCapture();
             }
             catch (Exception)
             {
@@ -1417,8 +1541,32 @@ namespace TrayToolbar
             }
         }
 
+
+
         private void stackPanel_Drop(object sender, DragEventArgs e)
         {
+            var data = e.Data as DataObject;
+            //e.Data.GetDataPresent()
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                foreach (var item in data.GetFileDropList())
+                {
+                    ;
+                    //if (stackPanel.Children.Contains(ActionIconButton a => a.))
+
+                    var fileName = Path.GetFileName(item);
+
+                    if (stackPanel.Children.OfType<ActionIconButton>().Any(btn => btn.Text.Equals(fileName + ".lnk")))
+                    {
+                        continue;
+                    }
+
+                    Shortcuts.CreateShortcut(fileName, dir, item);
+                    //LoadSettingsAndCreateButtons();
+                    CreateButtonAndAddToStackPanel(Path.Combine(dir, fileName) + ".lnk", fileName + ".lnk");
+                }
+            }
+
             if (e.Data.GetDataPresent("UIElement"))
             {
                 UIElement droptarget = e.Source as UIElement;
