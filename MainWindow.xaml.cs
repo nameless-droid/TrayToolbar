@@ -267,11 +267,24 @@ namespace TrayToolbar
             Hardcodet.Wpf.TaskbarNotification.Interop.Point p = myNotifyIcon.GetPopupTrayPosition();
             Left = p.X - Width - 5;
             Top = p.Y - Height - 5;
+            this.Activate();
         }
 
         public MainWindow()
         {
             InitializeComponent();
+
+            ContextMenu contextMenu = new();
+            MenuItem menuItem = new();
+            menuItem.Click += (sender, args) => ResetPosition();
+            menuItem.Header = "Reset Position";
+            contextMenu.Items.Add(menuItem);
+
+            contextMenu.AddToCm("Exit", () => App.Current.Shutdown());
+
+            //contextMenu.Items.Add(new MenuItem() {Header = "Reset Position"}.Click += (sender, args) => ResetPosition());
+
+            myNotifyIcon.ContextMenu = contextMenu;
 
             Microsoft.Win32.SystemEvents.PowerModeChanged += (sender, args) =>
             {
@@ -1106,6 +1119,11 @@ namespace TrayToolbar
             }
         }
 
+        //public void CreateButtonsFromFilesAndFolders()
+        //{
+
+        //}
+
         private void CreatButtonsFromFiles(List<string> ignoreFiles)
         {
             #region
@@ -1173,7 +1191,9 @@ namespace TrayToolbar
 
 
             List<string> files = Directory.GetFiles(dir).ToList();
+            files.AddRange(Directory.GetDirectories(dir));
             List<string> filescopy = Directory.GetFiles(dir).ToList();
+            filescopy.AddRange(Directory.GetDirectories(dir));
             //files = files.OrderBy(f => Regex.Replace(f, @"~[\d-]", string.Empty)).ToList();
             //files = files. (f => f.Replace(dir, "")).ToList();
 
@@ -1249,14 +1269,21 @@ namespace TrayToolbar
                         continue;
 
                     string text = System.IO.Path.GetFileName(item);
-                    CreateButtonAndAddToStackPanel(item, text);
+                    bool e = Directory.Exists(item);
+
+                    //CreateButtonAndAddToStackPanel(item, text, fileName: e == false "cmd" : "explorer");
+                    //var path = e == false ? "\"" + item + "\"" : "explorer \"" + item + "\"";
+                    //var path = item;
+
+                    CreateButtonAndAddToStackPanel(item, text, fileName: e == true ? "explorer" : "cmd");
                 }
             }
 
 
         }
 
-        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "", string fileName = "cmd", bool hideIFActive = false, bool xml = false)
+        private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "",
+            string fileName = "cmd", bool hideIFActive = false, bool xml = false, bool onlyAddingBtn = false)
         {
             //ActionIconButton actionIconButton = new(text, false);
 
@@ -1304,6 +1331,7 @@ namespace TrayToolbar
             //this.Width = 250;
             this.Width = 255;
 
+            if(onlyAddingBtn)
             this.Top -= itemHeight;
 
             actionIconButtonsList.Add(actionIconButton);
@@ -1357,10 +1385,19 @@ namespace TrayToolbar
             }
             else
             {
+                /*
                 //processStartInfo.Arguments = "/c \"" + cmd + "\"";
                 if (processStartInfo.FileName == "")
                     processStartInfo.FileName = cmd;
-                else processStartInfo.Arguments = "/c \"" + cmd + "\"";
+                else processStartInfo.Arguments = "/c " + cmd;
+                //else processStartInfo.Arguments = "/c \"" + cmd + "\"";
+                */
+                if (btn.FileName == "explorer")
+                {
+                    processStartInfo.WorkingDirectory = dir;
+                    processStartInfo.FileName = "explorer";
+                    processStartInfo.Arguments = cmd;
+                }
             }
 
 
@@ -1556,14 +1593,16 @@ namespace TrayToolbar
 
                     var fileName = Path.GetFileName(item);
 
-                    if (stackPanel.Children.OfType<ActionIconButton>().Any(btn => btn.Text.Equals(fileName + ".lnk")))
+                    if (stackPanel.Children.OfType<ActionIconButton>().Any(btn => 
+                        btn.Text.Equals(fileName + ".lnk")))
                     {
                         continue;
                     }
 
                     Shortcuts.CreateShortcut(fileName, dir, item);
                     //LoadSettingsAndCreateButtons();
-                    CreateButtonAndAddToStackPanel(Path.Combine(dir, fileName) + ".lnk", fileName + ".lnk");
+                    CreateButtonAndAddToStackPanel(Path.Combine(dir, fileName) + ".lnk", fileName + ".lnk",
+                        onlyAddingBtn: true);
                 }
             }
 

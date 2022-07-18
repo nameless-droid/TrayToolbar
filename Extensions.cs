@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace TrayToolbar
@@ -19,6 +20,14 @@ namespace TrayToolbar
         public static SolidColorBrush ToBrush(this string s)
         {
             return new SolidColorBrush((Color)ColorConverter.ConvertFromString(s));
+        }
+
+        public static void AddToCm(this ContextMenu cm, string header, Action action)
+        {
+            MenuItem menuItem = new();
+            menuItem.Click += (sender, args) => action.Invoke();
+            menuItem.Header = header;
+            cm.Items.Add(menuItem);
         }
     }
 }

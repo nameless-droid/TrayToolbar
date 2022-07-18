@@ -10,6 +10,7 @@
         <StackPanel Margin="0" x:Name="stackpanel" Background="{Binding background}" Orientation="Horizontal" HorizontalAlignment="Stretch">
             <Image Margin="3" x:Name="img" Width="32" Height="32" StretchDirection="Both"></Image>
             <Label Margin="0" Padding="0" x:Name="lbl" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"></Label>
+            <TextBox Visibility="Collapsed" Keyboard.KeyDown="tb_KeyDown" Text="" Margin="0" Padding="0" x:Name="tb" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="Wrap"></TextBox>
         </StackPanel>
         <!--<Image x:Name="img" Height="32" Width="32" HorizontalAlignment="Left" Margin="10"></Image>-->
         <!--<Label x:Name="lbl" Width="150" HorizontalAlignment="Center" HorizontalContentAlignment="Left"></Label>-->

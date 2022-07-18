@@ -26,14 +26,14 @@ namespace TrayToolbar
         //public List<XmlSettings> settings;
         public List<Setting> settings = new List<Setting>();
 
-        public string cashedFile;
+        public string cachedFile;
 
         //public static void Load(string file)
         public List<Setting> Load(string file)
         {
             settings.Clear();
 
-            cashedFile = file;
+            cachedFile = file;
             //List<Setting> settings = new();
 
             XmlDocument xmlDoc1 = new XmlDocument();

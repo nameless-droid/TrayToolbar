@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,7 @@ namespace TrayToolbar
         public bool FromXML
         {
             get
-            {
+            { 
                 return fromXML;
             }
             set { fromXML = value; }
@@ -60,6 +61,15 @@ namespace TrayToolbar
 
             PreviewMouseLeftButtonUp += (sender, args) => OnClick();
 
+            /*
+            //darkColorString = new ReadOnlySpan<string>("#2B2B2B");
+#if NET5_0_OR_GREATER
+            darkColorString = new ReadOnlySpan<char> { "#2B2B2B" };
+#else
+            darkColorString = "#2B2B2B";
+#endif
+            */
+
             darkColorString = "#2B2B2B";
             darkHoverColorString = "#414141";
 
@@ -68,6 +78,23 @@ namespace TrayToolbar
 
             LightMode = _lightMode;
             UpdateLightDarkMode();
+
+            if (Text.StartsWith("%search%"))
+            {
+                lbl.Visibility = Visibility.Collapsed;
+                tb.Visibility = Visibility.Visible;
+
+                if (File.Exists(Command))
+                {
+
+                }
+
+                /*if (Text.Contains("'"))
+                {
+                    var textToExecute_putintb = Text.Split('\'')[1];
+                    tb.Text = textToExecute_putintb;
+                }*/
+            }
         }
 
         public bool HideIfActive = false;
@@ -299,13 +326,13 @@ namespace TrayToolbar
 
             System.Drawing.Icon icon = System.Drawing.SystemIcons.Application;
 
-            //try
-            //{
-            icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
-            //}
-            //catch (Exception)
-            //{
-            //}
+            try
+            {
+                icon = System.Drawing.Icon.ExtractAssociatedIcon(filePath);
+            }
+            catch (Exception)
+            {
+            }
 
             img.Source = ToImageSource(icon);
         }
@@ -344,12 +371,47 @@ namespace TrayToolbar
 
         void OnClick()
         {
-            RaiseClickEvent();
+            if(lbl.Visibility == Visibility.Visible)
+                RaiseClickEvent();
         }
 
         private void ucontrol_Loaded(object sender, RoutedEventArgs e)
         {
+            if (tb.Visibility == Visibility.Collapsed) return;
 
+            //tb.Padding = new Thickness(Width - 20);
+            //tb.Width = Width;
+            tb.MinWidth = (double)Parent.GetValue(ActualWidthProperty) - img.ActualWidth - 10;
+
+            if(FileName == "")
+            {
+
+            }
+
+            var file = Command.Replace(".\\", "");
+            if (File.Exists(file))
+            {
+                tb.Text = File.ReadLines(file).FirstOrDefault()?.ToString();
+            }
+        }
+
+        private void tb_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter) return;
+            //Process.Start("cmd", tb.Text);
+
+            Process p = new();
+            p.StartInfo = new ProcessStartInfo()
+            {
+                FileName = "cmd",
+                //ArgumentList = new List[] { "/c", tb.Text },
+                //ArgumentList = new System.Collections.ObjectModel.Collection<string> { "/c", tb.Text },
+                Arguments =  "/c " + tb.Text, 
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true
+            };
+            p.Start();
         }
 
 
