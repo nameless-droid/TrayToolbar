@@ -43,8 +43,9 @@ namespace TrayToolbar
 
         //int itemHeight = 25;
         int itemHeight = 20;
-        string xmlFile = @"E:\Visual Studio 2021\TrayToolbar\bin\test.xmlf";
-        string dir = @"E:\Users\Anwender\Desktop\⠀\";
+        string xmlFile = "";
+        string dir = @".";
+        string dir2 = @"";
 
         //SolidColorBrush mainColor; //background
         //SolidColorBrush secondColor; //foreground
@@ -338,7 +339,7 @@ namespace TrayToolbar
 
             //GetXmlFile(Path.Combine(Directory.GetCurrentDirectory(), "items.xml"), 0);
             //MessageBox.Show("1.", Directory.GetCurrentDirectory());
-            
+
             //bool foundXmlFile = GetXmlFile(Directory.GetCurrentDirectory(), 0);
             xmlFile = GetXmlFile(Directory.GetCurrentDirectory(), 0);
             if (xmlFile == "")
@@ -407,7 +408,7 @@ namespace TrayToolbar
 
                 settingsFilePath = "items.xml";
             }
-            
+
 
 
             var exeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
@@ -498,8 +499,8 @@ namespace TrayToolbar
             {
                 //foreach (var item in Directory.GetFiles(Directory.GetCurrentDirectory()))
                 var currentPath = Path.GetDirectoryName(s);
-                
-                if(currentPath == null)
+
+                if (currentPath == null)
                 {
                     return "";
                 }
@@ -796,7 +797,7 @@ namespace TrayToolbar
 
             //return;
             //SetProcessDPIAware();
-            
+
             GetCursorPos(out var pt);
             //pt.X = 0;
 
@@ -805,7 +806,7 @@ namespace TrayToolbar
 
 
             //double newX = pt.X*dpiScaleX - dpiWidth / 2;
-            double newX = pt.X*dpiScaleX - (Width / 2) * dpiScaleX;
+            double newX = pt.X * dpiScaleX - (Width / 2) * dpiScaleX;
             //newX *= dpiScaleX;
             Left = newX;
             //Left = 10;
@@ -1331,8 +1332,8 @@ namespace TrayToolbar
             //this.Width = 250;
             this.Width = 255;
 
-            if(onlyAddingBtn)
-            this.Top -= itemHeight;
+            if (onlyAddingBtn)
+                this.Top -= itemHeight;
 
             actionIconButtonsList.Add(actionIconButton);
 
@@ -1593,7 +1594,7 @@ namespace TrayToolbar
 
                     var fileName = Path.GetFileName(item);
 
-                    if (stackPanel.Children.OfType<ActionIconButton>().Any(btn => 
+                    if (stackPanel.Children.OfType<ActionIconButton>().Any(btn =>
                         btn.Text.Equals(fileName + ".lnk")))
                     {
                         continue;
@@ -1755,6 +1756,23 @@ namespace TrayToolbar
             {
                 btn.Foreground = (XmlSettings.Instance.GetValueOfSetting("darkFg") ?? "#FFFFFF").ToBrush();
             }
+        }
+
+        private void OpenFolder_Click(object sender, RoutedEventArgs e)
+        {
+            //Process.Start(dir);
+            Process p = new();
+            ProcessStartInfo i = new ProcessStartInfo()
+            {
+                FileName = "cmd",
+                Arguments = "/c start " + dir,
+                CreateNoWindow = true,
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
+            };
+            p.StartInfo = i;
+            p.Start();
+
         }
     }
 
