@@ -245,6 +245,7 @@ namespace TrayToolbar
 
             // Settings File
             dir = instance.GetValueOfSetting("path") ?? dir;
+            dir2 = instance.GetValueOfSetting("path2") ?? dir2;
 
             //Theme = instance.GetValueOfSetting("theme") ?? WindowThemes.system;
             bool b = Enum.TryParse<WindowThemes>(instance.GetValueOfSetting("theme"), true, out WindowThemes result);
@@ -1017,6 +1018,7 @@ namespace TrayToolbar
             all_sp.Children.Remove(xml_sp);
             all_sp.Children.Add(xml_sp);
             CreatButtonsFromFiles(ignoreFiles);
+            CreatButtonsFromFiles2(ignoreFiles, dir2);
             CreateButtonsFromXML();
         }
 
@@ -1028,6 +1030,7 @@ namespace TrayToolbar
             all_sp.Children.Add(stackPanel);
             CreateButtonsFromXML();
             CreatButtonsFromFiles(ignoreFiles);
+            CreatButtonsFromFiles2(ignoreFiles, dir2);
         }
 
         private void CreateButtonsFromXML()
@@ -1283,6 +1286,74 @@ namespace TrayToolbar
 
         }
 
+        private void CreatButtonsFromFiles2(List<string> ignoreFiles, string dir)
+        {
+            List<string>? orderedFiles;
+            try
+            {
+                orderedFiles = File.ReadAllLines(Path.Combine(dir, "order"))?.ToList();
+            }
+            catch (Exception)
+            {
+                orderedFiles = null;
+            }
+
+            List<string> files = Directory.GetFiles(dir).ToList();
+            files.AddRange(Directory.GetDirectories(dir));
+            List<string> filescopy = Directory.GetFiles(dir).ToList();
+            filescopy.AddRange(Directory.GetDirectories(dir));
+
+            for (int i = 0; i < filescopy.Count; i++)
+                filescopy[i] = Path.GetFileName(filescopy[i]);
+
+            filescopy.Remove("order");
+
+            if (orderedFiles != null)
+            {
+                filescopy = filescopy.Except(orderedFiles).ToList();
+
+                if (filescopy.Count > 0)
+                {
+                    orderedFiles.AddRange(filescopy);
+                }
+            }
+
+            if (orderedFiles != null)
+            {
+                foreach (var fileName in orderedFiles)
+                {
+                    if (ignoreFiles.Contains(System.IO.Path.GetFileName(fileName)))
+                        continue;
+
+                    string filePath = Path.Combine(dir, fileName);
+
+                    if (filePath.Contains("desktop.files.json"))
+                    {
+                        ;
+                    }
+
+                    if (File.Exists(filePath))
+                        CreateButtonAndAddToStackPanel(filePath, fileName);
+                }
+            }
+            else
+            {
+                int count = 0;
+                foreach (string item in files)
+                {
+                    if (ignoreFiles.Contains(System.IO.Path.GetFileName(item)))
+                        continue;
+
+                    string text = System.IO.Path.GetFileName(item);
+                    bool e = Directory.Exists(item);
+
+                    CreateButtonAndAddToStackPanel(item, text, fileName: e == true ? "explorer" : "cmd");
+                }
+            }
+
+
+        }
+
         private void CreateButtonAndAddToStackPanel(string filePath, string text, string icon = "",
             string fileName = "cmd", bool hideIFActive = false, bool xml = false, bool onlyAddingBtn = false)
         {
@@ -1398,6 +1469,12 @@ namespace TrayToolbar
                     processStartInfo.WorkingDirectory = dir;
                     processStartInfo.FileName = "explorer";
                     processStartInfo.Arguments = cmd;
+                }
+                //else if (processStartInfo.FileName == "")
+                else
+                {
+                    //processStartInfo.FileName = cmd;
+                    processStartInfo.Arguments = "/c " + cmd;
                 }
             }
 
@@ -1668,41 +1745,50 @@ namespace TrayToolbar
             }
             else
             {
-                //btn.FileName
-                //File.copy
-                //File.Move(btn.FileName, )
-
-                int i = 0;
-                //File file = File.CreateText("order");
-                //using(StreamWriter sw = new StreamWriter(xmlFile))
-                var filePath = Path.Combine(dir, "order");
-
-                if (File.Exists(filePath))
-                {
-                    File.SetAttributes(filePath, File.GetAttributes(filePath) & ~FileAttributes.Hidden);
-                    //await Task.Delay(100);
-                }
-
-
-                //using (StreamWriter sw = File.CreateText(Path.Combine(dir, fileName)))
-                using (StreamWriter sw = File.CreateText(filePath))
-                {
-
-                    foreach (ActionIconButton child in stackPanel.Children)
-                    {
-                        if (!child.FromXML)
-                            //sw.WriteLine(child.FileName);
-                            sw.WriteLine(Path.GetFileName(child.Command));
-
-                    }
-
-                    File.SetAttributes(filePath, FileAttributes.Hidden);
-                }
-
-                //File.SetAttributes(Path.Combine(dir, "order"), FileAttributes.Hidden);
+                CreateOrderFile(dir);
+                CreateOrderFile(dir2);
             }
 
 
+        }
+
+        private void CreateOrderFile(string path)
+        {
+            //btn.FileName
+            //File.copy
+            //File.Move(btn.FileName, )
+
+            int i = 0;
+            //File file = File.CreateText("order");
+            //using(StreamWriter sw = new StreamWriter(xmlFile))
+            var filePath = Path.Combine(path, "order");
+
+            if (File.Exists(filePath))
+            {
+                File.SetAttributes(filePath, File.GetAttributes(filePath) & ~FileAttributes.Hidden);
+                //await Task.Delay(100);
+            }
+
+
+            //using (StreamWriter sw = File.CreateText(Path.Combine(dir, fileName)))
+            using (StreamWriter sw = File.CreateText(filePath))
+            {
+
+                foreach (ActionIconButton child in stackPanel.Children)
+                {
+                    if (!child.FromXML)
+                        //sw.WriteLine(child.FileName);
+                        sw.WriteLine(Path.GetFileName(child.Command));
+
+                }
+
+                File.SetAttributes(filePath, FileAttributes.Hidden);
+            }
+
+            //File.SetAttributes(Path.Combine(dir, "order"), FileAttributes.Hidden);
+
+            /////
+            ///
         }
 
         void OrderButtons()
