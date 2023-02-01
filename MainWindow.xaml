@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:TrayToolbar"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStyle="None" Background="Transparent" AllowsTransparency="True" PreviewKeyDown="MainWindow_PreviewKeyDown">
+        d:DataContext="{d:DesignData Source=/SampleData/SomeSampleData.xaml}"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="Tray Toolbar" Name="wnd" Height="450" Width="800" Loaded="Window_Loaded" WindowStyle="None" Background="Transparent" AllowsTransparency="True" PreviewKeyDown="MainWindow_PreviewKeyDown">
     <!--<WindowChrome.WindowChrome>
         <WindowChrome NonClientFrameEdges="None" GlassFrameThickness="0" ResizeBorderThickness="7" CaptionHeight="18" CornerRadius="0"></WindowChrome>
     </WindowChrome.WindowChrome>-->
@@ -48,6 +50,7 @@
             </VisualBrush>
         </Border.OpacityMask>
         <Grid ClipToBounds="True" Margin="0" Background="Transparent">
+            <Label Name="lblName" Content="{Binding ElementName=wnd, Path=Title, Mode=OneWay}" Background="White" Foreground="White"></Label>
             <Border CornerRadius="7" ClipToBounds="True" Height="19" Background="Transparent" VerticalAlignment="Top" BorderBrush="Transparent" BorderThickness="0">
                 <StackPanel ClipToBounds="True" Clip="{Binding ElementName=mainBorder}" x:Name="sp_WindowBar" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0">
                     <!--<Button Style="{StaticResource TransparentStyle}" Padding="5" Margin="0" WindowChrome.IsHitTestVisibleInChrome="True" Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" HorizontalAlignment="Right"></Button>-->

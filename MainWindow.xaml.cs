@@ -223,7 +223,8 @@ namespace TrayToolbar
         private void LoadSettings()
         {
             XmlSettings instance = XmlSettings.Instance;
-            instance.Load("settings.xml");
+            //instance.Load("settings.xml");
+            instance.Load(settingsFilePath);
 
             //
             XmlDocument xmlDoc2 = new XmlDocument();
@@ -275,6 +276,16 @@ namespace TrayToolbar
         public MainWindow()
         {
             InitializeComponent();
+            lblName.Background = Brushes.Transparent;
+            var args1 = Environment.GetCommandLineArgs();
+            if (args1.Length != 0 && args1[0] == "debug")
+            {
+                //lblName.Foreground = Brushes.Transparent;
+            }
+            else
+            {
+                Title =
+            }
 
             ContextMenu contextMenu = new();
             MenuItem menuItem = new();
@@ -407,7 +418,7 @@ namespace TrayToolbar
                     sw.Write("<settings></settings>");
                 }
 
-                settingsFilePath = "items.xml";
+                settingsFilePath = "settings.xml";
             }
 
 
@@ -484,6 +495,8 @@ namespace TrayToolbar
             dpiScaleY = e.NewDpi.DpiScaleY;
         }
 
+        //private string GetXmlFile()
+
         private string GetXmlFile(string s, int count, string name = "items.xml")
         {
             //MessageBox.Show(s.ToString() + " --- " + count);
@@ -507,13 +520,14 @@ namespace TrayToolbar
                 }
 
 
-                foreach (var fileName in Directory.GetFiles(currentPath))
+                foreach (var filePath in Directory.GetFiles(currentPath))
                 {
-                    if (fileName.Equals(name))
+                    if (filePath.EndsWith(name))
                     //if (Path.GetFileName(fileName).Equals("items.xml"))
                     {
-                        xmlFile = s;
-                        return s;
+                        //xmlFile = s;
+                        //xmlFile = filePath;
+                        return filePath;
                     }
                     //count++;
                     //GetXmlFile(System.IO.Path.GetFileName(fileName), count);
@@ -1288,6 +1302,7 @@ namespace TrayToolbar
 
         private void CreatButtonsFromFiles2(List<string> ignoreFiles, string dir)
         {
+            if (string.IsNullOrWhiteSpace(dir)) return;
             List<string>? orderedFiles;
             try
             {
@@ -1431,6 +1446,8 @@ namespace TrayToolbar
             //}
             //Cursor = Cursors.AppStarting;
 
+
+
             Mouse.OverrideCursor = Cursors.AppStarting;
             try
             {
@@ -1443,6 +1460,20 @@ namespace TrayToolbar
 
             var btn = ((ActionIconButton)sender);
             var cmd = btn.Command;
+
+            try
+            {
+                Process.Start(cmd);
+                return;
+            }
+            catch (Exception)
+            {
+
+                //throw;
+            }
+
+
+
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             //processStartInfo.FileName = "cmd";
 
@@ -1481,6 +1512,7 @@ namespace TrayToolbar
 
             //processStartInfo.UseShellExecute = true;
             //processStartInfo.RedirectStandardOutput = true;
+
             if (cmd.ToLower().Contains("pause") || cmd.ToUpper().Contains("!SHOWWND"))
             {
                 processStartInfo.CreateNoWindow = false;
@@ -1490,6 +1522,7 @@ namespace TrayToolbar
             {
                 processStartInfo.CreateNoWindow = true;
             }
+
 
             //processStartInfo.CreateNoWindow = false;
             Process p = new Process();
