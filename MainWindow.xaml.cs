@@ -284,7 +284,7 @@ namespace TrayToolbar
             }
             else
             {
-                Title =
+                //Title =
             }
 
             ContextMenu contextMenu = new();
@@ -1340,6 +1340,9 @@ namespace TrayToolbar
                     if (ignoreFiles.Contains(System.IO.Path.GetFileName(fileName)))
                         continue;
 
+                    if (!fileName.EndsWith(".exe"))
+                        continue;
+
                     string filePath = Path.Combine(dir, fileName);
 
                     if (filePath.Contains("desktop.files.json"))
@@ -1359,11 +1362,38 @@ namespace TrayToolbar
                     if (ignoreFiles.Contains(System.IO.Path.GetFileName(item)))
                         continue;
 
+                    if (!item.EndsWith(".exe"))
+                        continue;
+
                     string text = System.IO.Path.GetFileName(item);
                     bool e = Directory.Exists(item);
 
                     CreateButtonAndAddToStackPanel(item, text, fileName: e == true ? "explorer" : "cmd");
                 }
+
+#if NETFRAMEWORK
+                foreach (var dir1 in Directory.GetDirectories(dir))
+                {
+                    foreach (var dir2 in Directory.GetDirectories(dir1))
+                    {
+                        var files1 = Directory.GetFiles(dir2, "*.exe");
+                        foreach (var item in files1)
+                        {
+                            string text = System.IO.Path.GetFileName(item);
+                            CreateButtonAndAddToStackPanel(item, dir2 + "-"+ text, fileName: "cmd");
+                        }
+                    }
+                }
+#else
+                var files1 = Directory.GetFiles(dir2, "*.exe", SearchOption.AllDirectories);
+                foreach (var item in files1)
+                {
+                    string text = System.IO.Path.GetFileName(item);
+                    //var d = 
+                    //CreateButtonAndAddToStackPanel(item, Path.GetFileName(dir2) + "\\" + text, fileName: "cmd");
+                    CreateButtonAndAddToStackPanel(item, Path.GetFullPath(item) + text, fileName: "cmd");
+                }
+#endif
             }
 
 
